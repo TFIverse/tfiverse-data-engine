@@ -1,0 +1,46 @@
+name: Box Office Live Tracker
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  scrape-bms:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run BookMyShow Scraper
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run scrape:bms
+
+  scrape-paytm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Paytm Scraper
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run scrape:paytm

@@ -1,0 +1,42 @@
+name: Squash Backup History
+
+on:
+  schedule:
+    # Run every Sunday at midnight IST (18:30 UTC Saturday)
+    - cron: '30 18 * * 6'
+  workflow_dispatch:
+
+jobs:
+  squash-history:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: data-backup
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Create Orphan Branch and Squash
+        run: |
+          # Create a new temporary branch with no history
+          git checkout --orphan temp-backup
+          
+          # Add all current files (the JSON backups)
+          git add -A
+          
+          # Create the initial squashed commit
+          git commit -m "chore(backup): squashed weekly JSON backup [skip ci]"
+          
+          # Delete the old backup branch
+          git branch -D data-backup || true
+          
+          # Rename temporary branch to data-backup
+          git branch -m data-backup
+          
+          # Force push to remote to overwrite history
+          git push -f origin data-backup

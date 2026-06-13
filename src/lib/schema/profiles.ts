@@ -1,0 +1,68 @@
+import { pgTable, text, timestamp, uuid, integer, boolean, jsonb, unique } from 'drizzle-orm/pg-core';
+import { users } from './auth';
+
+export const userProfiles = pgTable('user_profile', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('userId').notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
+  username: text('username').notNull().unique(),
+  bio: text('bio'),
+  location: text('location'),
+  website: text('website'),
+  coverImage: text('coverImage'),
+  totalReviews: integer('totalReviews').default(0),
+  totalWatchlist: integer('totalWatchlist').default(0),
+  totalFollowers: integer('totalFollowers').default(0),
+  statusEmoji: text('status_emoji'),
+  themeColor: text('theme_color').default('#3b82f6'),
+  totalFollowing: integer('totalFollowing').default(0),
+  badges: jsonb('badges').$type<string[]>().default([]),
+  isPublic: boolean('isPublic').default(true),
+  createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow(),
+  pronouns: text('pronouns'),
+  statusMessage: text('statusMessage'),
+  avatarUrl: text('avatarUrl'),
+  bannerUrl: text('bannerUrl'),
+  twitterUrl: text('twitterUrl'),
+  instagramUrl: text('instagramUrl'),
+  youtubeUrl: text('youtubeUrl'),
+  tiktokUrl: text('tiktokUrl'),
+  imdbUrl: text('imdbUrl'),
+  letterboxdUrl: text('letterboxdUrl'),
+  totalWatched: integer('totalWatched').default(0),
+  totalMemes: integer('totalMemes').default(0),
+  totalTierLists: integer('totalTierLists').default(0),
+  totalMoviesWatched: integer('total_movies_watched').default(0),
+  totalReviewsWritten: integer('total_reviews_written').default(0),
+  totalLikesGiven: integer('total_likes_given').default(0),
+  streakDays: integer('streak_days').default(0),
+  favoriteBadges: jsonb('favoriteBadges').$type<string[]>().default([]),
+  favoriteHeroSlug: text('favorite_hero_slug'),
+  favoriteMovieSlug: text('favorite_movie_slug'),
+  showFollowers: boolean('showFollowers').default(true),
+  showFollowing: boolean('showFollowing').default(true),
+  showWatchlist: boolean('showWatchlist').default(true),
+  showWatched: boolean('showWatched').default(true),
+  showReviews: boolean('showReviews').default(true),
+  showTierLists: boolean('showTierLists').default(true),
+  showMemes: boolean('showMemes').default(true),
+  isOnline: boolean('isOnline').default(false),
+  lastSeen: timestamp('lastSeen', { mode: 'date' }),
+  dateOfBirth: timestamp('dateOfBirth', { mode: 'date' }),
+});
+
+export const userFollows = pgTable('user_follows', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  followerId: uuid('followerId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  followingId: uuid('followingId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow(),
+}, (table) => ({
+  uniqueFollow: unique('unique_user_follow').on(table.followerId, table.followingId),
+}));
+
+export const profileViews = pgTable('profile_views', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  viewerId: uuid('viewer_id').references(() => users.id),
+  profileId: uuid('profile_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  viewedAt: timestamp('viewed_at').defaultNow(),
+});
