@@ -33,6 +33,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/latest_bms_data.json
           git commit -m "chore(data): auto-update BMS box office stats [skip ci]" || exit 0
+          git pull --rebase origin main
           git push
 
   scrape-paytm:
@@ -63,4 +64,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/latest_paytm_data.json
           git commit -m "chore(data): auto-update Paytm box office stats [skip ci]" || exit 0
+          git pull --rebase origin main
           git push
