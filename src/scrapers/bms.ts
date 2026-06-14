@@ -1,16 +1,9 @@
-import * as dotenv from 'dotenv';
-import * as path from 'path';
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
-import { db } from '../utils/db';
-import { movies } from '../lib/schema/content';
-import { realtimeSessions } from '../lib/schema/tracking';
-import { eq, or, sql } from 'drizzle-orm';
 import { getBMSHeaders } from '../utils/headers';
-import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
 
-// The two movies we are tracking
 const TRACKING_KEYWORDS = ['Peddi', 'Salaar'];
+const DATA_DIR = path.resolve(__dirname, '../../data');
 
 function cleanMovieTitle(title: string): string {
     return title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
@@ -51,7 +44,6 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string): Promise<any[
         for (const ev of (sd[0].Event || [])) {
             const title = ev.EventTitle || "Unknown";
             
-            // Only track our specific movies
             if (!TRACKING_KEYWORDS.some(k => title.toLowerCase().includes(k.toLowerCase()))) {
                 continue;
             }
@@ -105,27 +97,20 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string): Promise<any[
 }
 
 async function runScraper() {
-    console.log("🚀 Starting BMS Scraper...");
+    console.log("🚀 Starting BMS Scraper (JSON Output Mode)...");
     const dateStr = getISTDateStr();
     const dateCode = getISTDateCode();
 
-    // 1. Fetch Venue List dynamically (to ensure we have all theaters)
     console.log("📥 Fetching venue list...");
     let venuesList: any[] = [];
     try {
-        // We fetch BFilmy's public static venue dictionaries
         const urls = [1].map(i => `https://raw.githubusercontent.com/unknownman2024/assetz/refs/heads/main/venues${i}.json`);
         for (const url of urls) {
             const res = await fetch(url);
             if (res.ok) {
                 const data = await res.json();
                 for (const [code, val] of Object.entries(data as any)) {
-                    venuesList.push({
-                        code,
-                        name: (val as any).VenueName,
-                        city: (val as any).City,
-                        state: (val as any).State,
-                    });
+                    venuesList.push({ code, name: (val as any).VenueName, city: (val as any).City, state: (val as any).State });
                 }
             }
         }
@@ -135,9 +120,6 @@ async function runScraper() {
         return;
     }
 
-    // Since this is a test run, we'll only do a subset of venues
-    // to see if we successfully hit the DB.
-    // In production, we loop through all 3000 venues with concurrency limit.
     const testVenues = venuesList.slice(0, 100);
     const sessionsToInsert: any[] = [];
 
@@ -147,61 +129,18 @@ async function runScraper() {
         if (results.length > 0) {
             sessionsToInsert.push(...results);
         }
-        // Small delay to prevent rate limit
         await new Promise(r => setTimeout(r, 200));
     }
 
     console.log(`✅ Found ${sessionsToInsert.length} sessions for our tracked movies.`);
 
-    if (sessionsToInsert.length > 0) {
-        console.log("💾 Upserting to Database...");
-        
-        // Find DB Movie ID
-        const dbMovies = await db.select().from(movies).where(
-            or(
-                sql`${movies.title} ILIKE '%Peddi%'`,
-                sql`${movies.title} ILIKE '%Salaar%'`
-            )
-        );
-
-        let successCount = 0;
-        for (const session of sessionsToInsert) {
-            const dbMovie = dbMovies.find(m => m.title.toLowerCase().includes(cleanMovieTitle(session.rawTitle).toLowerCase()) || session.rawTitle.toLowerCase().includes(m.title.toLowerCase()));
-            if (!dbMovie) continue;
-
-            try {
-                await db.insert(realtimeSessions).values({
-                    movieId: dbMovie.id,
-                    sessionId: session.sessionId,
-                    venueName: session.venue,
-                    chainName: session.chain,
-                    city: session.city,
-                    state: session.state,
-                    showDate: new Date(dateStr),
-                    showTime: session.time,
-                    audi: session.audi,
-                    totalSeats: session.totalSeats,
-                    availableSeats: session.availableSeats,
-                    soldSeats: session.soldSeats,
-                    grossRevenue: session.grossRevenue,
-                    source: session.source,
-                    lastUpdated: new Date()
-                }).onConflictDoUpdate({
-                    target: [realtimeSessions.movieId, realtimeSessions.sessionId],
-                    set: {
-                        availableSeats: session.availableSeats,
-                        soldSeats: session.soldSeats,
-                        grossRevenue: session.grossRevenue,
-                        lastUpdated: new Date(),
-                    }
-                });
-                successCount++;
-            } catch (err) {
-                console.error("DB Insert Error:", err);
-            }
-        }
-        console.log(`🎉 Successfully upserted ${successCount} sessions!`);
+    if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
     }
+
+    const filepath = path.join(DATA_DIR, 'latest_bms_data.json');
+    fs.writeFileSync(filepath, JSON.stringify(sessionsToInsert, null, 2));
+    console.log(`💾 Successfully saved data to ${filepath}`);
 
     console.log("🏁 BMS Scraper Complete.");
     process.exit(0);

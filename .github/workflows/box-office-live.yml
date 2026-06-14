@@ -6,6 +6,9 @@ on:
     - cron: '*/15 * * * *'
   workflow_dispatch: # Allows manual trigger
 
+permissions:
+  contents: write
+
 jobs:
   scrape-bms:
     runs-on: ubuntu-latest
@@ -22,15 +25,24 @@ jobs:
         run: npm install
 
       - name: Run BookMyShow Scraper
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npm run scrape:bms
+
+      - name: Commit and Push Data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latest_bms_data.json
+          git commit -m "chore(data): auto-update BMS box office stats [skip ci]" || exit 0
+          git push
 
   scrape-paytm:
     runs-on: ubuntu-latest
+    needs: scrape-bms # Run after BMS to avoid git conflicts
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          ref: main # Ensure we get the latest commit from BMS scraper
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -42,5 +54,13 @@ jobs:
 
       - name: Run Paytm Scraper
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          WORKER_KEY: ${{ secrets.WORKER_KEY }}
         run: npm run scrape:paytm
+
+      - name: Commit and Push Data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latest_paytm_data.json
+          git commit -m "chore(data): auto-update Paytm box office stats [skip ci]" || exit 0
+          git push

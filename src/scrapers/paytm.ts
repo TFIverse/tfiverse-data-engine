@@ -2,16 +2,13 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-import { db } from '../utils/db';
-import { movies } from '../lib/schema/content';
-import { realtimeSessions } from '../lib/schema/tracking';
-import { eq, or, sql } from 'drizzle-orm';
 import * as crypto from 'crypto';
+import * as fs from 'fs';
 
 const WORKER_KEY = process.env.WORKER_KEY;
 const WORKER_UA = process.env.WORKER_UA || 'Mozilla/5.0';
+const DATA_DIR = path.resolve(__dirname, '../../data');
 
-// The two movies we are tracking
 const TRACKING_KEYWORDS = ['Peddi', 'Salaar'];
 
 function getISTDateStr(): string {
@@ -28,10 +25,7 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<an
     const url = `https://districtvenues.text2026mail.workers.dev/?cinema_id=${venueId}&date=${dateStr}`;
     try {
         const res = await fetch(url, {
-            headers: {
-                'User-Agent': WORKER_UA,
-                'x-api-key': WORKER_KEY,
-            },
+            headers: { 'User-Agent': WORKER_UA, 'x-api-key': WORKER_KEY },
             timeout: 10000,
         } as any);
 
@@ -48,9 +42,7 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<an
             if (!movie) continue;
 
             const name = movie.name;
-            if (!TRACKING_KEYWORDS.some(k => name.toLowerCase().includes(k.toLowerCase()))) {
-                continue;
-            }
+            if (!TRACKING_KEYWORDS.some(k => name.toLowerCase().includes(k.toLowerCase()))) continue;
 
             const lang = session.lang || movie.lang || "";
             const format = session.format || movie.format || "";
@@ -70,7 +62,6 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<an
                 hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata'
             }) : 'Unknown';
 
-            // Generate deterministic sessionId
             const hashInput = `${json.meta?.cinema_name}-${json.meta?.city_name}-${timeStr}-${session.audi}-${dateStr}`;
             const sessionId = crypto.createHash('md5').update(hashInput).digest('hex').slice(0, 16);
 
@@ -99,7 +90,7 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<an
 }
 
 async function runScraper() {
-    console.log("🚀 Starting Paytm/District Scraper...");
+    console.log("🚀 Starting Paytm/District Scraper (JSON Output Mode)...");
 
     if (!WORKER_KEY) {
         console.error("❌ ERROR: WORKER_KEY is not set in .env! Cannot scrape Paytm/District.");
@@ -113,10 +104,7 @@ async function runScraper() {
     try {
         const url = `https://raw.githubusercontent.com/unknownman2024/assetz/refs/heads/main/districtvenues.json`;
         const res = await fetch(url);
-        if (res.ok) {
-            venuesList = await res.json();
-            console.log(`✅ Loaded ${venuesList.length} Paytm venues.`);
-        }
+        if (res.ok) venuesList = await res.json();
     } catch (err) {
         console.error("Failed to load venues:", err);
         return;
@@ -128,62 +116,17 @@ async function runScraper() {
     console.log(`🌐 Scraping ${testVenues.length} Paytm venues for ${dateStr}...`);
     for (const v of testVenues) {
         const results = await scrapeDistrictVenue(v.id, dateStr);
-        if (results.length > 0) {
-            sessionsToInsert.push(...results);
-        }
+        if (results.length > 0) sessionsToInsert.push(...results);
         await new Promise(r => setTimeout(r, 200));
     }
 
-    console.log(`✅ Found ${sessionsToInsert.length} sessions for our tracked movies.`);
-
-    if (sessionsToInsert.length > 0) {
-        console.log("💾 Upserting to Database...");
-        
-        const dbMovies = await db.select().from(movies).where(
-            or(
-                sql`${movies.title} ILIKE '%Peddi%'`,
-                sql`${movies.title} ILIKE '%Salaar%'`
-            )
-        );
-
-        let successCount = 0;
-        for (const session of sessionsToInsert) {
-            const dbMovie = dbMovies.find(m => m.title.toLowerCase().includes(session.rawTitle.toLowerCase()) || session.rawTitle.toLowerCase().includes(m.title.toLowerCase()));
-            if (!dbMovie) continue;
-
-            try {
-                await db.insert(realtimeSessions).values({
-                    movieId: dbMovie.id,
-                    sessionId: session.sessionId,
-                    venueName: session.venue,
-                    chainName: session.chain,
-                    city: session.city,
-                    state: session.state,
-                    showDate: new Date(dateStr),
-                    showTime: session.time,
-                    audi: session.audi,
-                    totalSeats: session.totalSeats,
-                    availableSeats: session.availableSeats,
-                    soldSeats: session.soldSeats,
-                    grossRevenue: session.grossRevenue,
-                    source: session.source,
-                    lastUpdated: new Date()
-                }).onConflictDoUpdate({
-                    target: [realtimeSessions.movieId, realtimeSessions.sessionId],
-                    set: {
-                        availableSeats: session.availableSeats,
-                        soldSeats: session.soldSeats,
-                        grossRevenue: session.grossRevenue,
-                        lastUpdated: new Date(),
-                    }
-                });
-                successCount++;
-            } catch (err) {
-                console.error("DB Insert Error:", err);
-            }
-        }
-        console.log(`🎉 Successfully upserted ${successCount} sessions!`);
+    if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
     }
+
+    const filepath = path.join(DATA_DIR, 'latest_paytm_data.json');
+    fs.writeFileSync(filepath, JSON.stringify(sessionsToInsert, null, 2));
+    console.log(`💾 Successfully saved data to ${filepath}`);
 
     console.log("🏁 Paytm Scraper Complete.");
     process.exit(0);
