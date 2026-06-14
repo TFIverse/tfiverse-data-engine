@@ -9,17 +9,20 @@ const WORKER_KEY = process.env.WORKER_KEY;
 const WORKER_UA = process.env.WORKER_UA || 'Mozilla/5.0';
 const DATA_DIR = path.resolve(__dirname, '../../data');
 
-const TRACKING_KEYWORDS = ['Peddi', 'Salaar'];
+function cleanMovieTitle(title: string): string {
+    return title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
+}
 
-function getISTDateStr(): string {
+function getISTDateStr(daysOffset: number = 0): string {
     const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    ist.setDate(ist.getDate() + daysOffset);
     const y = ist.getFullYear();
     const m = String(ist.getMonth() + 1).padStart(2, '0');
     const d = String(ist.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
 }
 
-async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<any[]> {
+async function scrapeDistrictVenue(venueId: string, dateStr: string, trackingKeywords: string[]): Promise<any[]> {
     if (!WORKER_KEY) return [];
 
     const url = `https://districtvenues.text2026mail.workers.dev/?cinema_id=${venueId}&date=${dateStr}`;
@@ -42,7 +45,16 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<an
             if (!movie) continue;
 
             const name = movie.name;
-            if (!TRACKING_KEYWORDS.some(k => name.toLowerCase().includes(k.toLowerCase()))) continue;
+            
+            // Dynamic Keyword Check
+            let isTracked = false;
+            for (const kw of trackingKeywords) {
+                if (name.toLowerCase().includes(kw.toLowerCase())) {
+                    isTracked = true;
+                    break;
+                }
+            }
+            if (!isTracked) continue;
 
             const lang = session.lang || movie.lang || "";
             const format = session.format || movie.format || "";
@@ -58,9 +70,11 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<an
                 gross += (a.sTotal - a.sAvail) * (a.price || 0);
             });
 
+            // Reconstruct full DateTime
             const timeStr = session.showTime ? new Date(session.showTime).toLocaleTimeString('en-US', {
                 hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata'
             }) : 'Unknown';
+            const isoDate = `${dateStr} ${timeStr}`;
 
             const hashInput = `${json.meta?.cinema_name}-${json.meta?.city_name}-${timeStr}-${session.audi}-${dateStr}`;
             const sessionId = crypto.createHash('md5').update(hashInput).digest('hex').slice(0, 16);
@@ -72,7 +86,7 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<an
                 chain: 'Paytm',
                 city: json.meta?.city_name || 'Unknown City',
                 state: json.meta?.state_name || 'Unknown State',
-                time: timeStr,
+                time: isoDate,
                 audi: session.audi || "",
                 sessionId: sessionId,
                 totalSeats: total,
@@ -90,44 +104,64 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string): Promise<an
 }
 
 async function runScraper() {
-    console.log("🚀 Starting Paytm/District Scraper (JSON Output Mode)...");
+    console.log("🚀 Starting Dynamic Paytm/District Scraper...");
 
     if (!WORKER_KEY) {
         console.error("❌ ERROR: WORKER_KEY is not set in .env! Cannot scrape Paytm/District.");
         process.exit(1);
     }
 
-    const dateStr = getISTDateStr();
+    // 1. Load Dynamic Tracking Keywords
+    const moviesPath = path.join(DATA_DIR, 'movies.json');
+    let trackingKeywords: string[] = [];
+    if (fs.existsSync(moviesPath)) {
+        const mv = JSON.parse(fs.readFileSync(moviesPath, 'utf8'));
+        trackingKeywords = mv.map((m: any) => cleanMovieTitle(m.title));
+    } else {
+        console.error("❌ movies.json not found! Run the Discovery Engine first.");
+        process.exit(1);
+    }
+    console.log(`🎬 Tracking ${trackingKeywords.length} live movies...`);
 
     console.log("📥 Fetching district venue list...");
-    let venuesList: any[] = [];
+    let testVenues: any[] = [];
     try {
         const url = `https://raw.githubusercontent.com/unknownman2024/assetz/refs/heads/main/districtvenues.json`;
         const res = await fetch(url);
-        if (res.ok) venuesList = await res.json();
+        if (res.ok) {
+            const data = await res.json();
+            testVenues = data;
+        }
     } catch (err) {
         console.error("Failed to load venues:", err);
-        return;
+        process.exit(1);
     }
 
-    const testVenues = venuesList.slice(0, 100);
+    if (!process.env.GITHUB_ACTIONS) {
+        testVenues = testVenues.slice(0, 100);
+    }
+
     const sessionsToInsert: any[] = [];
+    const daysToScrape = [0, 1, 2, 3, 4]; // Scrape today + next 4 days
 
-    console.log(`🌐 Scraping ${testVenues.length} Paytm venues for ${dateStr}...`);
-    for (const v of testVenues) {
-        const results = await scrapeDistrictVenue(v.id, dateStr);
-        if (results.length > 0) sessionsToInsert.push(...results);
-        await new Promise(r => setTimeout(r, 200));
+    for (const offset of daysToScrape) {
+        const dateStr = getISTDateStr(offset);
+        console.log(`\n🌐 Scraping ${testVenues.length} Paytm venues for Date: ${dateStr}...`);
+        
+        for (const v of testVenues) {
+            const results = await scrapeDistrictVenue(v.id, dateStr, trackingKeywords);
+            if (results.length > 0) sessionsToInsert.push(...results);
+            await new Promise(r => setTimeout(r, 200));
+        }
     }
 
-    if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
+    console.log(`\n✅ Found ${sessionsToInsert.length} total sessions across 5 days.`);
 
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     const filepath = path.join(DATA_DIR, 'latest_paytm_data.json');
     fs.writeFileSync(filepath, JSON.stringify(sessionsToInsert, null, 2));
+    
     console.log(`💾 Successfully saved data to ${filepath}`);
-
     console.log("🏁 Paytm Scraper Complete.");
     process.exit(0);
 }

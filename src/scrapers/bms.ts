@@ -2,26 +2,22 @@ import { getBMSHeaders } from '../utils/headers';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const TRACKING_KEYWORDS = ['Peddi', 'Salaar'];
 const DATA_DIR = path.resolve(__dirname, '../../data');
 
 function cleanMovieTitle(title: string): string {
     return title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
 }
 
-function getISTDateStr(): string {
+function getISTDateCode(daysOffset: number = 0): string {
     const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    ist.setDate(ist.getDate() + daysOffset);
     const y = ist.getFullYear();
     const m = String(ist.getMonth() + 1).padStart(2, '0');
     const d = String(ist.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
+    return `${y}${m}${d}`;
 }
 
-function getISTDateCode(): string {
-    return getISTDateStr().replace(/-/g, '');
-}
-
-async function scrapeBMSVenue(venueCode: string, dateCode: string): Promise<any[]> {
+async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywords: string[]): Promise<any[]> {
     const url = `https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode=${venueCode}&dateCode=${dateCode}`;
     const headers = getBMSHeaders();
 
@@ -44,9 +40,15 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string): Promise<any[
         for (const ev of (sd[0].Event || [])) {
             const title = ev.EventTitle || "Unknown";
             
-            if (!TRACKING_KEYWORDS.some(k => title.toLowerCase().includes(k.toLowerCase()))) {
-                continue;
+            // Dynamic Keyword check
+            let isTracked = false;
+            for (const kw of trackingKeywords) {
+                if (title.toLowerCase().includes(kw.toLowerCase())) {
+                    isTracked = true;
+                    break;
+                }
             }
+            if (!isTracked) continue;
 
             for (const ch of (ev.ChildEvents || [])) {
                 const dim = (ch.EventDimension || "").trim();
@@ -70,6 +72,9 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string): Promise<any[
                         gross += (seats - free) * price;
                     }
 
+                    // Reconstruct the actual Date string from dateCode
+                    const isoDate = `${dateCode.substring(0,4)}-${dateCode.substring(4,6)}-${dateCode.substring(6,8)} ${sh.ShowTime}`;
+
                     out.push({
                         movie,
                         rawTitle: title,
@@ -77,7 +82,7 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string): Promise<any[
                         chain,
                         city,
                         state,
-                        time: sh.ShowTime || "",
+                        time: isoDate,
                         audi: sh.Attributes || "",
                         sessionId: String(sh.SessionId || ""),
                         totalSeats: total,
@@ -97,51 +102,69 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string): Promise<any[
 }
 
 async function runScraper() {
-    console.log("🚀 Starting BMS Scraper (JSON Output Mode)...");
-    const dateStr = getISTDateStr();
-    const dateCode = getISTDateCode();
+    console.log("🚀 Starting Dynamic BMS Scraper...");
+    
+    // 1. Load Dynamic Tracking Keywords
+    const moviesPath = path.join(DATA_DIR, 'movies.json');
+    let trackingKeywords: string[] = [];
+    if (fs.existsSync(moviesPath)) {
+        const mv = JSON.parse(fs.readFileSync(moviesPath, 'utf8'));
+        trackingKeywords = mv.map((m: any) => cleanMovieTitle(m.title));
+    } else {
+        console.error("❌ movies.json not found! Run the Discovery Engine first.");
+        process.exit(1);
+    }
+    console.log(`🎬 Tracking ${trackingKeywords.length} live movies...`);
 
-    console.log("📥 Fetching venue list...");
-    let venuesList: any[] = [];
-    try {
-        const urls = [1].map(i => `https://raw.githubusercontent.com/unknownman2024/assetz/refs/heads/main/venues${i}.json`);
-        for (const url of urls) {
-            const res = await fetch(url);
+    // 2. Load Master Venue List
+    console.log("📥 Loading master venue list...");
+    let testVenues: any[] = [];
+    const venuesPath = path.join(DATA_DIR, 'bms_venues.json');
+    if (fs.existsSync(venuesPath)) {
+        testVenues = JSON.parse(fs.readFileSync(venuesPath, 'utf8'));
+    } else {
+        // Fallback for development if mapping script hasn't run
+        try {
+            const res = await fetch(`https://raw.githubusercontent.com/unknownman2024/assetz/refs/heads/main/venues1.json`);
             if (res.ok) {
                 const data = await res.json();
                 for (const [code, val] of Object.entries(data as any)) {
-                    venuesList.push({ code, name: (val as any).VenueName, city: (val as any).City, state: (val as any).State });
+                    testVenues.push({ code, name: (val as any).VenueName, city: (val as any).City });
                 }
             }
-        }
-        console.log(`✅ Loaded ${venuesList.length} venues.`);
-    } catch (err) {
-        console.error("Failed to load venues:", err);
-        return;
+        } catch (e) {}
     }
 
-    const testVenues = venuesList.slice(0, 100);
+    if (!process.env.GITHUB_ACTIONS) {
+        testVenues = testVenues.slice(0, 100); // Limit local dev
+    }
+
     const sessionsToInsert: any[] = [];
 
-    console.log(`🌐 Scraping ${testVenues.length} BMS venues for ${dateStr}...`);
-    for (const v of testVenues) {
-        const results = await scrapeBMSVenue(v.code, dateCode);
-        if (results.length > 0) {
-            sessionsToInsert.push(...results);
+    // 3. Multi-Day Advance Booking Loop
+    const daysToScrape = [0, 1, 2, 3, 4]; // Scrape today + next 4 days
+
+    for (const offset of daysToScrape) {
+        const dateCode = getISTDateCode(offset);
+        console.log(`\n🌐 Scraping ${testVenues.length} BMS venues for Date: ${dateCode}...`);
+        
+        for (const v of testVenues) {
+            const results = await scrapeBMSVenue(v.code, dateCode, trackingKeywords);
+            if (results.length > 0) {
+                sessionsToInsert.push(...results);
+            }
+            // Rate limiting
+            await new Promise(r => setTimeout(r, 200));
         }
-        await new Promise(r => setTimeout(r, 200));
     }
 
-    console.log(`✅ Found ${sessionsToInsert.length} sessions for our tracked movies.`);
+    console.log(`\n✅ Found ${sessionsToInsert.length} total sessions across 5 days.`);
 
-    if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     const filepath = path.join(DATA_DIR, 'latest_bms_data.json');
     fs.writeFileSync(filepath, JSON.stringify(sessionsToInsert, null, 2));
+    
     console.log(`💾 Successfully saved data to ${filepath}`);
-
     console.log("🏁 BMS Scraper Complete.");
     process.exit(0);
 }

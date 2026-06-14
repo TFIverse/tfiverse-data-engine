@@ -1,14 +1,15 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import * as fs from 'fs';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 import { getBMSHeaders } from '../utils/headers';
-import * as fs from 'fs';
+
+const DATA_DIR = path.resolve(__dirname, '../../data');
 
 async function mapAllVenues() {
     console.log("🌍 Starting Full Venue Discovery Engine (Small Towns & Villages)...");
     
-    // 1. Fetch all regions
     console.log("📥 Fetching master region list from BookMyShow...");
     const regionUrl = 'https://in.bookmyshow.com/api/v2/mobile/regions';
     const regions = [];
@@ -29,12 +30,14 @@ async function mapAllVenues() {
         process.exit(1);
     }
 
-    // 2. We normally loop through all 1,200 regions to build the master theater list.
-    // In this script, we output the count to demonstrate the discovery logic.
-    let totalTheatersFound = 0;
-    const testRegions = regions.slice(0, 10); // Just check top 10 for safety in execution
+    const venuesList: any[] = [];
+    
+    // In production we loop all 1200+, for now we loop top 50 to avoid timeout locally.
+    // GitHub actions runs the full list since it has 6 hour limits.
+    const runFull = process.env.GITHUB_ACTIONS === 'true';
+    const testRegions = runFull ? regions : regions.slice(0, 50);
 
-    console.log(`🕵️‍♂️ Discovering theaters across top ${testRegions.length} test regions...`);
+    console.log(`🕵️‍♂️ Discovering theaters across ${testRegions.length} regions...`);
     
     for (const region of testRegions) {
         const code = region.RegionCode;
@@ -45,7 +48,15 @@ async function mapAllVenues() {
             if (res.ok) {
                 const data = await res.json();
                 const venues = data.BookMyShow?.Venues || [];
-                totalTheatersFound += venues.length;
+                
+                for (const v of venues) {
+                    venuesList.push({
+                        code: v.VenueCode,
+                        name: v.VenueName,
+                        city: region.RegionName,
+                        state: 'Unknown' // We can map state later from a master dict
+                    });
+                }
                 console.log(`   📍 ${region.RegionName} (${code}): Found ${venues.length} theaters.`);
             }
         } catch (e) {
@@ -54,8 +65,12 @@ async function mapAllVenues() {
         await new Promise(r => setTimeout(r, 500)); // Rate limit protection
     }
 
-    console.log(`\n🎉 Discovery Engine Complete! Found ${totalTheatersFound} theaters in test regions.`);
-    console.log(`In production, this script maps all 4,000+ theaters and pushes the JSON mapping to the 'raw-data' backup branch.`);
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    
+    const venuesPath = path.join(DATA_DIR, 'bms_venues.json');
+    fs.writeFileSync(venuesPath, JSON.stringify(venuesList, null, 2));
+
+    console.log(`\n🎉 Discovery Complete! Found ${venuesList.length} theaters. Saved to data/bms_venues.json`);
     process.exit(0);
 }
 
