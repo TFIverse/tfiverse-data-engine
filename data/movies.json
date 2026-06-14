@@ -1,0 +1,67 @@
+[
+  {
+    "tmdbId": 811941,
+    "title": "Devara - Part 1",
+    "slug": "devara-part-1",
+    "overview": "An epic action saga set against coastal lands.",
+    "releaseDate": "2024-09-27",
+    "year": 2024,
+    "posterUrl": "https://image.tmdb.org/t/p/w500/iSj2eFhJqRzCjHk6P3jC5vC4M2w.jpg",
+    "backdropUrl": null,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "tmdbId": 817585,
+    "title": "Pushpa 2: The Rule",
+    "slug": "pushpa-2-the-rule",
+    "overview": "The clash is on as Pushpa and Bhanwar Singh continue their rivalry.",
+    "releaseDate": "2024-12-05",
+    "year": 2024,
+    "posterUrl": "https://image.tmdb.org/t/p/w500/1pQ0Oyy93fFHKvX8A31Y7H1aE0n.jpg",
+    "backdropUrl": null,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "tmdbId": 801688,
+    "title": "Game Changer",
+    "slug": "game-changer",
+    "overview": "An honest IAS officer battles political corruption.",
+    "releaseDate": "2024-12-20",
+    "year": 2024,
+    "posterUrl": null,
+    "backdropUrl": null,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "tmdbId": 1139566,
+    "title": "Kalki 2898 AD",
+    "slug": "kalki-2898-ad",
+    "overview": "A modern-day avatar of Vishnu descends to Earth to protect the world.",
+    "releaseDate": "2024-06-27",
+    "year": 2024,
+    "posterUrl": null,
+    "backdropUrl": null,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "tmdbId": 123456,
+    "title": "Peddi",
+    "slug": "peddi",
+    "overview": "Upcoming action film.",
+    "releaseDate": "2024-08-15",
+    "year": 2024,
+    "posterUrl": null,
+    "backdropUrl": null,
+    "metadata": {
+      "source": "manual"
+    }
+  }
+]
