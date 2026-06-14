@@ -144,14 +144,22 @@ async function runScraper() {
     const sessionsToInsert: any[] = [];
     const daysToScrape = [0, 1, 2, 3, 4]; // Scrape today + next 4 days
 
+    const concurrency = 10;
+
     for (const offset of daysToScrape) {
         const dateStr = getISTDateStr(offset);
-        console.log(`\n🌐 Scraping ${testVenues.length} Paytm venues for Date: ${dateStr}...`);
+        console.log(`\n🌐 Scraping ${testVenues.length} Paytm venues for Date: ${dateStr} (Concurrency: ${concurrency})...`);
         
-        for (const v of testVenues) {
-            const results = await scrapeDistrictVenue(v.id, dateStr, trackingKeywords);
-            if (results.length > 0) sessionsToInsert.push(...results);
-            await new Promise(r => setTimeout(r, 200));
+        for (let i = 0; i < testVenues.length; i += concurrency) {
+            const chunk = testVenues.slice(i, i + concurrency);
+            const promises = chunk.map(v => scrapeDistrictVenue(v.id, dateStr, trackingKeywords));
+            
+            const resultsArray = await Promise.all(promises);
+            for (const results of resultsArray) {
+                if (results.length > 0) sessionsToInsert.push(...results);
+            }
+            
+            await new Promise(r => setTimeout(r, 100)); // Light sleep between chunks
         }
     }
 

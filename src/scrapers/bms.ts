@@ -141,17 +141,22 @@ async function runScraper() {
 
     const sessionsToInsert: any[] = [];
 
-    // 3. Multi-Day Advance Booking Loop
+    const concurrency = 5; // Gentler concurrency for BMS directly
     const daysToScrape = [0, 1, 2, 3, 4]; // Scrape today + next 4 days
 
     for (const offset of daysToScrape) {
         const dateCode = getISTDateCode(offset);
-        console.log(`\n🌐 Scraping ${testVenues.length} BMS venues for Date: ${dateCode}...`);
+        console.log(`\n🌐 Scraping ${testVenues.length} BMS venues for Date: ${dateCode} (Concurrency: ${concurrency})...`);
         
-        for (const v of testVenues) {
-            const results = await scrapeBMSVenue(v.code, dateCode, trackingKeywords);
-            if (results.length > 0) {
-                sessionsToInsert.push(...results);
+        for (let i = 0; i < testVenues.length; i += concurrency) {
+            const chunk = testVenues.slice(i, i + concurrency);
+            const promises = chunk.map(v => scrapeBMSVenue(v.code, dateCode, trackingKeywords));
+            
+            const resultsArray = await Promise.all(promises);
+            for (const results of resultsArray) {
+                if (results.length > 0) {
+                    sessionsToInsert.push(...results);
+                }
             }
             // Rate limiting
             await new Promise(r => setTimeout(r, 200));
