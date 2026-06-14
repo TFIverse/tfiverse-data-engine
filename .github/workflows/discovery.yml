@@ -29,13 +29,11 @@ jobs:
           NEXT_PUBLIC_TMDB_API_KEY: ${{ secrets.NEXT_PUBLIC_TMDB_API_KEY }}
         run: npm run discovery
 
-      - name: Run Venue Discovery
-        run: npx tsx src/discovery/map-venues.ts
 
       - name: Commit and Push Data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/movies.json data/bms_venues.json
+          git add data/movies.json
           git commit -m "chore(data): auto-update movies and venues list [skip ci]" || exit 0
           git push
