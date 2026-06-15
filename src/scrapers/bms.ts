@@ -87,8 +87,7 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywo
                         gross += (seats - free) * price;
                     }
 
-                    // Reconstruct the actual Date string from dateCode
-                    const isoDate = `${dateCode.substring(0,4)}-${dateCode.substring(4,6)}-${dateCode.substring(6,8)} ${sh.ShowTime}`;
+                    // isoDate is already declared and constructed above
 
                     out.push({
                         movie,
