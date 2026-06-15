@@ -33,9 +33,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull origin main --rebase
           git add data/latest_bms_live_data.json
           git commit -m "chore(data): auto-update BMS LIVE box office stats [skip ci]" || exit 0
+          git pull origin main --rebase
           git push
 
   scrape-paytm:
@@ -66,7 +66,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull origin main --rebase
           git add data/latest_paytm_live_data.json
           git commit -m "chore(data): auto-update Paytm LIVE box office stats [skip ci]" || exit 0
+          git pull origin main --rebase
           git push
