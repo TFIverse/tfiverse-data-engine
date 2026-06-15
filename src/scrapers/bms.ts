@@ -156,7 +156,10 @@ async function runScraper() {
     const sessionsToInsert: any[] = [];
 
     const concurrency = 5; // Gentler concurrency for BMS directly
-    const daysToScrape = [0, 1, 2, 3, 4]; // Scrape today + next 4 days
+    
+    // Live mode only needs today and tomorrow (to catch 1 AM shows). Advance needs 5 days.
+    const isAdvance = process.env.SCRAPE_MODE === 'ADVANCE';
+    const daysToScrape = isAdvance ? [0, 1, 2, 3, 4] : [0, 1];
 
     for (const offset of daysToScrape) {
         const dateCode = getISTDateCode(offset);

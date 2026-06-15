@@ -165,7 +165,10 @@ async function runScraper() {
     // We scrape all venues to ensure 100% full data coverage
 
     const sessionsToInsert: any[] = [];
-    const daysToScrape = [0, 1, 2, 3, 4]; // Scrape today + next 4 days
+    
+    // Live mode only needs today and tomorrow (to catch 1 AM shows). Advance needs 5 days.
+    const isAdvance = process.env.SCRAPE_MODE === 'ADVANCE';
+    const daysToScrape = isAdvance ? [0, 1, 2, 3, 4] : [0, 1];
 
     const concurrency = 10;
 
