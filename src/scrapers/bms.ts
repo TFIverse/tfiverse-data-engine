@@ -62,9 +62,11 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywo
                     
                     // The 200-minute strict cutoff logic for Live Box Office vs Advance
                     const isAdvanceMode = process.env.SCRAPE_MODE === 'ADVANCE';
-                    const showTimeDate = new Date(isoDate);
-                    const now = new Date();
-                    const diffMins = (showTimeDate.getTime() - now.getTime()) / (1000 * 60);
+                    const showTimeLocal = new Date(isoDate);
+                    const nowStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+                    const nowLocal = new Date(nowStr);
+                    
+                    const diffMins = (showTimeLocal.getTime() - nowLocal.getTime()) / (1000 * 60);
                     
                     if (isAdvanceMode) {
                         if (diffMins < 200) continue; // Skip live shows in advance mode

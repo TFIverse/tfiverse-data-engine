@@ -54,9 +54,17 @@ async function scrapeDistrictVenue(venue: any, dateStr: string, trackingKeywords
             // The 200-minute strict cutoff logic for Live Box Office vs Advance
             const isAdvanceMode = process.env.SCRAPE_MODE === 'ADVANCE';
             if (session.showTime) {
-                const showTime = new Date(session.showTime);
-                const now = new Date();
-                const diffMins = (showTime.getTime() - now.getTime()) / (1000 * 60);
+                // Reconstruct the showtime string in IST clock time
+                const timeStr = new Date(session.showTime).toLocaleTimeString('en-US', {
+                    hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata'
+                });
+                const isoDateStr = `${dateStr} ${timeStr}`;
+                
+                const showTimeLocal = new Date(isoDateStr);
+                const nowStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+                const nowLocal = new Date(nowStr);
+                
+                const diffMins = (showTimeLocal.getTime() - nowLocal.getTime()) / (1000 * 60);
                 
                 if (isAdvanceMode) {
                     if (diffMins < 200) continue; // Skip live shows in advance mode
