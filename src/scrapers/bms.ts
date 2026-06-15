@@ -40,15 +40,7 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywo
         for (const ev of (sd[0].Event || [])) {
             const title = ev.EventTitle || "Unknown";
             
-            // Dynamic Keyword check
-            let isTracked = false;
-            for (const kw of trackingKeywords) {
-                if (title.toLowerCase().includes(kw.toLowerCase())) {
-                    isTracked = true;
-                    break;
-                }
-            }
-            if (!isTracked) continue;
+            // Track EVERY live movie!
 
             for (const ch of (ev.ChildEvents || [])) {
                 const dim = (ch.EventDimension || "").trim();

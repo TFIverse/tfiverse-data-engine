@@ -46,15 +46,7 @@ async function scrapeDistrictVenue(venue: any, dateStr: string, trackingKeywords
 
             const name = movie.name;
             
-            // Dynamic Keyword Check
-            let isTracked = false;
-            for (const kw of trackingKeywords) {
-                if (name.toLowerCase().includes(kw.toLowerCase())) {
-                    isTracked = true;
-                    break;
-                }
-            }
-            if (!isTracked) continue;
+            // Track EVERY live movie!
 
             const lang = session.lang || movie.lang || "";
             const format = session.format || movie.format || "";
