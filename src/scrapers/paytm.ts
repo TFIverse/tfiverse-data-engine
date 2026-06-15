@@ -22,10 +22,10 @@ function getISTDateStr(daysOffset: number = 0): string {
     return `${y}-${m}-${d}`;
 }
 
-async function scrapeDistrictVenue(venueId: string, dateStr: string, trackingKeywords: string[]): Promise<any[]> {
+async function scrapeDistrictVenue(venue: any, dateStr: string, trackingKeywords: string[]): Promise<any[]> {
     if (!WORKER_KEY) return [];
 
-    const url = `https://districtvenues.text2026mail.workers.dev/?cinema_id=${venueId}&date=${dateStr}`;
+    const url = `https://districtvenues.text2026mail.workers.dev/?cinema_id=${venue.id}&date=${dateStr}`;
     try {
         const res = await fetch(url, {
             headers: { 'User-Agent': WORKER_UA, 'x-api-key': WORKER_KEY },
@@ -63,11 +63,13 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string, trackingKey
 
             const total = session.total || 0;
             const avail = session.avail || 0;
-            const sold = total - avail;
+            const sold = Math.max(0, total - avail);
 
             let gross = 0;
             (session.areas || []).forEach((a: any) => {
-                gross += (a.sTotal - a.sAvail) * (a.price || 0);
+                const soldInArea = Math.max(0, a.sTotal - a.sAvail);
+                const priceInRupees = (a.price || 0) / 100; // Paytm price is usually in Paisa
+                gross += soldInArea * priceInRupees;
             });
 
             // Reconstruct full DateTime
@@ -76,16 +78,16 @@ async function scrapeDistrictVenue(venueId: string, dateStr: string, trackingKey
             }) : 'Unknown';
             const isoDate = `${dateStr} ${timeStr}`;
 
-            const hashInput = `${json.meta?.cinema_name}-${json.meta?.city_name}-${timeStr}-${session.audi}-${dateStr}`;
+            const hashInput = `${venue.label}-${venue.city}-${timeStr}-${session.audi}-${dateStr}`;
             const sessionId = crypto.createHash('md5').update(hashInput).digest('hex').slice(0, 16);
 
             out.push({
                 movie: movieTitle,
                 rawTitle: name,
-                venue: json.meta?.cinema_name || 'Unknown Venue',
-                chain: 'Paytm',
-                city: json.meta?.city_name || 'Unknown City',
-                state: json.meta?.state_name || 'Unknown State',
+                venue: venue.label || venue.district_name || 'Unknown Venue',
+                chain: venue.chainKey || 'Paytm',
+                city: venue.city || 'Unknown City',
+                state: venue.state || 'Unknown State',
                 time: isoDate,
                 audi: session.audi || "",
                 sessionId: sessionId,
@@ -152,7 +154,7 @@ async function runScraper() {
         
         for (let i = 0; i < testVenues.length; i += concurrency) {
             const chunk = testVenues.slice(i, i + concurrency);
-            const promises = chunk.map(v => scrapeDistrictVenue(v.id, dateStr, trackingKeywords));
+            const promises = chunk.map(v => scrapeDistrictVenue(v, dateStr, trackingKeywords));
             
             const resultsArray = await Promise.all(promises);
             for (const results of resultsArray) {
