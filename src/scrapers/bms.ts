@@ -179,8 +179,9 @@ async function runScraper() {
 
     console.log(`\n✅ Found ${sessionsToInsert.length} total sessions across 5 days.`);
 
+    const mode = (process.env.SCRAPE_MODE || 'LIVE').toLowerCase();
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-    const filepath = path.join(DATA_DIR, 'latest_bms_data.json');
+    const filepath = path.join(DATA_DIR, `latest_bms_${mode}_data.json`);
     fs.writeFileSync(filepath, JSON.stringify(sessionsToInsert, null, 2));
     
     console.log(`💾 Successfully saved data to ${filepath}`);
