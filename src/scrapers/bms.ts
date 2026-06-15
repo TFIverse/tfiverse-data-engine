@@ -139,9 +139,16 @@ async function runScraper() {
     if (fs.existsSync(venuesPath)) {
         testVenues = JSON.parse(fs.readFileSync(venuesPath, 'utf8'));
     } else {
-        // Fallback: Load the massive 3,379 Master Venue List extracted from database
-        console.log("🗄️ Loading master venue list...");
-        testVenues = require('../../data/bms_venues_master.json');
+        // Fallback for development if mapping script hasn't run
+        try {
+            const res = await fetch(`https://raw.githubusercontent.com/unknownman2024/assetz/refs/heads/main/venues1.json`);
+            if (res.ok) {
+                const data = await res.json();
+                for (const [code, val] of Object.entries(data as any)) {
+                    testVenues.push({ code, name: (val as any).VenueName, city: (val as any).City });
+                }
+            }
+        } catch (e) {}
     }
 
     // We scrape all venues to ensure 100% full data coverage

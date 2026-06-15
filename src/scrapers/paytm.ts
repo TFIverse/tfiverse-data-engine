@@ -148,8 +148,19 @@ async function runScraper() {
     }
     console.log(`🎬 Tracking ${trackingKeywords.length} live movies...`);
 
-    console.log("🗄️ Loading master venue list...");
-    let testVenues: any[] = require('../../data/paytm_venues_master.json');
+    console.log("📥 Fetching district venue list...");
+    let testVenues: any[] = [];
+    try {
+        const url = `https://raw.githubusercontent.com/unknownman2024/assetz/refs/heads/main/districtvenues.json`;
+        const res = await fetch(url);
+        if (res.ok) {
+            const data = await res.json();
+            testVenues = data;
+        }
+    } catch (err) {
+        console.error("Failed to load venues:", err);
+        process.exit(1);
+    }
 
     // We scrape all venues to ensure 100% full data coverage
 
