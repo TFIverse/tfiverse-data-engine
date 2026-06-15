@@ -8,6 +8,11 @@ function cleanMovieTitle(title: string): string {
     return title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
 }
 
+function formatState(stateStr: string): string {
+    if (!stateStr || typeof stateStr !== 'string') return 'Unknown';
+    return stateStr.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function getISTDateCode(daysOffset: number = 0): string {
     const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     ist.setDate(ist.getDate() + daysOffset);
@@ -32,8 +37,8 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywo
         const venue = sd[0].Venues || {};
         const venueName = venue.VenueName || "Unknown";
         const city = venue.VenueCity || "Unknown";
-        const chain = venue.VenueCompName || "Unknown";
-        const state = venue.VenueState || "Unknown State";
+        const chain = venue.VenueCompName || "Independent";
+        const state = formatState(venue.VenueState || 'Unknown');
 
         const out = [];
 
@@ -45,11 +50,27 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywo
             for (const ch of (ev.ChildEvents || [])) {
                 const dim = (ch.EventDimension || "").trim();
                 const lang = (ch.EventLanguage || "").trim();
-                const suffix = [dim, lang].filter(Boolean).join(" | ");
-                const movie = suffix ? `${title} [${suffix}]` : title;
+                // Language-aware key like BFilmy: "Peddi | Telugu" or "Peddi [2D | Telugu]"
+                const movie = dim 
+                    ? `${title} [${dim} | ${lang}]` 
+                    : lang ? `${title} | ${lang}` : title;
 
                 for (const sh of (ch.ShowTimes || [])) {
                     if (sh.ShowDateCode !== dateCode) continue;
+
+                    const isoDate = `${dateCode.substring(0,4)}-${dateCode.substring(4,6)}-${dateCode.substring(6,8)} ${sh.ShowTime}`;
+                    
+                    // The 200-minute strict cutoff logic for Live Box Office vs Advance
+                    const isAdvanceMode = process.env.SCRAPE_MODE === 'ADVANCE';
+                    const showTimeDate = new Date(isoDate);
+                    const now = new Date();
+                    const diffMins = (showTimeDate.getTime() - now.getTime()) / (1000 * 60);
+                    
+                    if (isAdvanceMode) {
+                        if (diffMins < 200) continue; // Skip live shows in advance mode
+                    } else {
+                        if (diffMins >= 200) continue; // Skip advance shows in live mode
+                    }
 
                     let total = 0, avail = 0, sold = 0, gross = 0;
                     
@@ -70,6 +91,8 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywo
                     out.push({
                         movie,
                         rawTitle: title,
+                        lang: lang,
+                        format: dim,
                         venue: venueName,
                         chain,
                         city,
@@ -127,9 +150,7 @@ async function runScraper() {
         } catch (e) {}
     }
 
-    if (!process.env.GITHUB_ACTIONS) {
-        testVenues = testVenues.slice(0, 100); // Limit local dev
-    }
+    // We scrape all venues to ensure 100% full data coverage
 
     const sessionsToInsert: any[] = [];
 

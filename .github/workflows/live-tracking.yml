@@ -1,0 +1,72 @@
+name: Live Box Office Tracker
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-bms:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run BookMyShow Scraper
+        env:
+          SCRAPE_MODE: LIVE
+        run: npm run scrape:bms
+
+      - name: Commit and Push Data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latest_bms_data.json
+          git commit -m "chore(data): auto-update BMS LIVE box office stats [skip ci]" || exit 0
+          git pull --rebase origin main
+          git push
+
+  scrape-paytm:
+    runs-on: ubuntu-latest
+    needs: scrape-bms # Run after BMS to avoid git conflicts
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: main # Ensure we get the latest commit from BMS scraper
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Paytm Scraper
+        env:
+          WORKER_KEY: ${{ secrets.WORKER_KEY }}
+          WORKER_UA: ${{ secrets.WORKER_UA }}
+          SCRAPE_MODE: LIVE
+        run: npm run scrape:paytm
+
+      - name: Commit and Push Data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latest_paytm_data.json
+          git commit -m "chore(data): auto-update Paytm LIVE box office stats [skip ci]" || exit 0
+          git pull --rebase origin main
+          git push

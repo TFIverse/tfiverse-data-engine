@@ -13,6 +13,11 @@ function cleanMovieTitle(title: string): string {
     return title.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
 }
 
+function formatState(stateStr: string): string {
+    if (!stateStr || typeof stateStr !== 'string') return 'Unknown';
+    return stateStr.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).trim();
+}
+
 function getISTDateStr(daysOffset: number = 0): string {
     const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     ist.setDate(ist.getDate() + daysOffset);
@@ -46,12 +51,29 @@ async function scrapeDistrictVenue(venue: any, dateStr: string, trackingKeywords
 
             const name = movie.name;
             
+            // The 200-minute strict cutoff logic for Live Box Office vs Advance
+            const isAdvanceMode = process.env.SCRAPE_MODE === 'ADVANCE';
+            if (session.showTime) {
+                const showTime = new Date(session.showTime);
+                const now = new Date();
+                const diffMins = (showTime.getTime() - now.getTime()) / (1000 * 60);
+                
+                if (isAdvanceMode) {
+                    if (diffMins < 200) continue; // Skip live shows in advance mode
+                } else {
+                    if (diffMins >= 200) continue; // Skip advance shows in live mode
+                }
+            }
+
             // Track EVERY live movie!
 
             const lang = session.lang || movie.lang || "";
-            const format = session.format || movie.format || "";
-            const suffix = [format, lang].filter(Boolean).join(" | ");
-            const movieTitle = suffix ? `${name} [${suffix}]` : name;
+            const format = session.scrnFmt || session.format || movie.format || "";
+            const formattedFormat = format ? format.replace(/-/g, ' | ') : '';
+            // Language-aware key like BFilmy: "Peddi | Telugu" or "Peddi [2D | Telugu]"
+            const movieTitle = formattedFormat 
+                ? `${name} [${formattedFormat} | ${lang}]` 
+                : lang ? `${name} | ${lang}` : name;
 
             const total = session.total || 0;
             const avail = session.avail || 0;
@@ -60,8 +82,7 @@ async function scrapeDistrictVenue(venue: any, dateStr: string, trackingKeywords
             let gross = 0;
             (session.areas || []).forEach((a: any) => {
                 const soldInArea = Math.max(0, a.sTotal - a.sAvail);
-                const priceInRupees = (a.price || 0) / 100; // Paytm price is usually in Paisa
-                gross += soldInArea * priceInRupees;
+                gross += soldInArea * (a.price || 0); // Raw price like BFilmy — no /100
             });
 
             // Reconstruct full DateTime
@@ -76,10 +97,12 @@ async function scrapeDistrictVenue(venue: any, dateStr: string, trackingKeywords
             out.push({
                 movie: movieTitle,
                 rawTitle: name,
+                lang: lang,
+                format: formattedFormat || format,
                 venue: venue.label || venue.district_name || 'Unknown Venue',
-                chain: venue.chainKey || 'Paytm',
+                chain: venue.chainKey || 'Independent',
                 city: venue.city || 'Unknown City',
-                state: venue.state || 'Unknown State',
+                state: formatState(venue.state || 'Unknown'),
                 time: isoDate,
                 audi: session.audi || "",
                 sessionId: sessionId,
@@ -131,9 +154,7 @@ async function runScraper() {
         process.exit(1);
     }
 
-    if (!process.env.GITHUB_ACTIONS) {
-        testVenues = testVenues.slice(0, 100);
-    }
+    // We scrape all venues to ensure 100% full data coverage
 
     const sessionsToInsert: any[] = [];
     const daysToScrape = [0, 1, 2, 3, 4]; // Scrape today + next 4 days
