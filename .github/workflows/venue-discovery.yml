@@ -1,0 +1,38 @@
+name: Venue Discovery Engine
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+  schedule:
+    - cron: '0 0 1 * *' # Auto-run on the 1st of every month at midnight
+
+permissions:
+  contents: write
+
+jobs:
+  discover-venues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run BookMyShow Venue Discovery
+        env:
+          GITHUB_ACTIONS: "true"
+        run: npm run map-venues
+
+      - name: Commit and Push Mapped Venues
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/bms_venues.json
+          git commit -m "chore(data): auto-update 5000+ BMS venue mapping [skip ci]" || exit 0
+          git pull origin main --rebase
+          git push
