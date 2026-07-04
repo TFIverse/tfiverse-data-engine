@@ -32,9 +32,9 @@ async function mapAllVenues() {
 
     const venuesList: any[] = [];
     
-    // In production we loop all 1200+, for now we loop top 50 to avoid timeout locally.
-    // GitHub actions runs the full list since it has 6 hour limits.
-    const runFull = process.env.GITHUB_ACTIONS === 'true';
+    // In production we loop all 1200+ regions.
+    // We are running this locally to bypass Cloudflare.
+    const runFull = true;
     const testRegions = runFull ? regions : regions.slice(0, 50);
 
     console.log(`🕵️‍♂️ Discovering theaters across ${testRegions.length} regions...`);
