@@ -78,3 +78,28 @@ jobs:
           git commit -m "chore(data): auto-update Paytm LIVE box office stats [skip ci]" || exit 0
           git pull origin main --rebase
           git push
+
+  scrape-sacnilk:
+    runs-on: ubuntu-latest
+    needs: scrape-paytm
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install Dependencies
+        run: npm install
+      - name: Run SACNilk Scraper
+        run: npx tsx src/scrapers/sacnilk.ts
+      - name: Commit and Push Data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/sacnilk_data.json
+          git commit -m "chore(data): auto-update SACNilk industry stats [skip ci]" || exit 0
+          git pull origin main --rebase
+          git push
