@@ -83,7 +83,10 @@ def scrape_venue(scraper, venue, date_code, tracking_keywords, is_advance):
                     show_time_str = sh.get("ShowTime")
                     if not show_time_str: continue
                     
-                    iso_date = f"{date_code[:4]}-{date_code[4:6]}-{date_code[6:]} {show_time_str}"
+                    import re
+                    # Normalize spaces and uppercase (e.g. "10:30  am" -> "10:30 AM")
+                    clean_time = re.sub(r'\s+', ' ', show_time_str).strip().upper()
+                    iso_date = f"{date_code[:4]}-{date_code[4:6]}-{date_code[6:]} {clean_time}"
                     try:
                         show_time_local = datetime.strptime(iso_date, "%Y-%m-%d %I:%M %p").replace(tzinfo=IST)
                     except ValueError:
