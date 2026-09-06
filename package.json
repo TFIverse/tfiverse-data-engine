@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "scrape:bms": "tsx src/scrapers/bms.ts",
+    "scrape:bms": "python3 src/scrapers/bms.py",
     "scrape:paytm": "tsx src/scrapers/paytm.ts",
     "discovery": "tsx src/discovery/find-movies.ts",
     "map-venues": "tsx src/discovery/map-venues.ts"

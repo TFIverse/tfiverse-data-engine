@@ -22,7 +22,7 @@ function getISTDateCode(daysOffset: number = 0): string {
     return `${y}${m}${d}`;
 }
 
-async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywords: string[]): Promise<any[]> {
+async function scrapeBMSVenue(venueCode: string, venueCity: string, dateCode: string, trackingKeywords: string[]): Promise<any[]> {
     const url = `https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode=${venueCode}&dateCode=${dateCode}`;
     const headers = getBMSHeaders();
 
@@ -36,7 +36,7 @@ async function scrapeBMSVenue(venueCode: string, dateCode: string, trackingKeywo
 
         const venue = sd[0].Venues || {};
         const venueName = venue.VenueName || "Unknown";
-        const city = venue.VenueCity || "Unknown";
+        const city = venueCity || venue.VenueCity || "Unknown";
         const chain = venue.VenueCompName || "Independent";
         const state = formatState(venue.VenueState || 'Unknown');
 
@@ -167,7 +167,7 @@ async function runScraper() {
         
         for (let i = 0; i < testVenues.length; i += concurrency) {
             const chunk = testVenues.slice(i, i + concurrency);
-            const promises = chunk.map(v => scrapeBMSVenue(v.code, dateCode, trackingKeywords));
+            const promises = chunk.map(v => scrapeBMSVenue(v.code, v.city, dateCode, trackingKeywords));
             
             const resultsArray = await Promise.all(promises);
             for (const results of resultsArray) {
