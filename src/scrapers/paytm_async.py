@@ -1,58 +1,69 @@
-import asyncio
-import aiohttp
-import json
 import os
+import json
 import datetime
-from pathlib import Path
 import random
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import cloudscraper
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 VENUES_FILE = DATA_DIR / "paytm_venues_master.json"
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Accept": "application/json",
-    "client": "ticketnew",
-    "Origin": "https://ticketnew.com",
-    "Referer": "https://ticketnew.com/"
-}
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/119.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/118.0.0.0 Safari/537.36",
+]
 
-def get_x_forwarded_for():
-    return f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
+def get_scraper():
+    scraper = cloudscraper.create_scraper(
+        browser={"browser": "chrome", "platform": "windows", "desktop": True}
+    )
+    scraper.headers.update({
+        "User-Agent": random.choice(USER_AGENTS),
+        "Accept": "application/json",
+        "client": "ticketnew",
+        "Origin": "https://ticketnew.com",
+        "Referer": "https://ticketnew.com/",
+        "X-Forwarded-For": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
+    })
+    return scraper
 
-async def fetch_venue(session, venue_id, date_str, retries=3):
-    # This is a generalized District / Ticketnew API structure based on their NEXT_DATA.
-    # We use a mobile/proxy endpoint representation here.
+def fetch_venue(venue_id, date_str, retries=3):
     url = f"https://apiproxy.paytm.com/v3/movies/search/movie?cinema_id={venue_id}&date={date_str}"
+    scraper = get_scraper()
     
-    headers = HEADERS.copy()
-    headers["X-Forwarded-For"] = get_x_forwarded_for()
-
     for attempt in range(retries):
         try:
-            async with session.get(url, headers=headers, timeout=10) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return {"venueId": venue_id, "data": data}
-                elif response.status == 429:
-                    await asyncio.sleep(2 ** attempt)
+            response = scraper.get(url, timeout=10)
+            if response.status_code == 200:
+                if not response.text.strip().startswith("{"):
+                    raise RuntimeError(f"Blocked by anti-bot on {venue_id}")
+                return {"venueId": venue_id, "data": response.json()}
+            elif response.status_code in [403, 429]:
+                scraper = get_scraper()
+                import time
+                time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
         except Exception as e:
             if attempt == retries - 1:
                 print(f"Error fetching {venue_id}: {e}")
     return {"venueId": venue_id, "data": None}
 
-async def process_venues(venues, date_str, concurrency=50):
-    semaphore = asyncio.Semaphore(concurrency)
-    
-    async def sem_fetch(venue):
-        async with semaphore:
-            return await fetch_venue(session, venue.get("id"), date_str)
-            
-    async with aiohttp.ClientSession() as session:
-        tasks = [sem_fetch(venue) for venue in venues if venue.get("id")]
-        results = await asyncio.gather(*tasks)
-        return results
+def process_venues(venues, date_str, max_workers=10):
+    results = []
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_venue = {
+            executor.submit(fetch_venue, venue.get("id"), date_str): venue
+            for venue in venues if venue.get("id")
+        }
+        for future in as_completed(future_to_venue):
+            try:
+                res = future.result()
+                results.append(res)
+            except Exception as exc:
+                print(f"Venue generated an exception: {exc}")
+    return results
 
 def parse_paytm_data(raw_results, date_str):
     final_sessions = []
@@ -91,8 +102,8 @@ def parse_paytm_data(raw_results, date_str):
                     
     return final_sessions
 
-async def main():
-    print("🚀 Starting Async Paytm Scraper...")
+def main():
+    print("🚀 Starting Sync Paytm Scraper with Cloudscraper bypass...")
     if not VENUES_FILE.exists():
         print(f"❌ Error: {VENUES_FILE} not found!")
         return
@@ -111,13 +122,13 @@ async def main():
         venues = venues[start_idx:end_idx]
         print(f"🔹 Running Shard {shard_index+1}/{total_shards} - processing {len(venues)} venues.")
 
-    today = datetime.date.today()
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30))).date()
     live_date_str = today.strftime("%Y-%m-%d")
     
     shard_suffix = f"_{shard_index}" if total_shards > 1 else ""
     
     print(f"📡 Fetching Live Data for {live_date_str}...")
-    live_raw = await process_venues(venues, live_date_str)
+    live_raw = process_venues(venues, live_date_str)
     live_parsed = parse_paytm_data(live_raw, live_date_str)
     
     with open(DATA_DIR / f"latest_paytm_data{shard_suffix}.json", "w") as f:
@@ -128,7 +139,7 @@ async def main():
     adv_date_str = tomorrow.strftime("%Y-%m-%d")
     
     print(f"📡 Fetching Advance Data for {adv_date_str}...")
-    adv_raw = await process_venues(venues, adv_date_str)
+    adv_raw = process_venues(venues, adv_date_str)
     adv_parsed = parse_paytm_data(adv_raw, adv_date_str)
     
     with open(DATA_DIR / f"latest_paytm_advance_data{shard_suffix}.json", "w") as f:
@@ -136,4 +147,4 @@ async def main():
     print(f"✅ Saved {len(adv_parsed)} advance sessions.")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

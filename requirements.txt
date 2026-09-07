@@ -1,4 +1,4 @@
-aiohttp
-asyncio
+cloudscraper
+requests
 fake-useragent
 brotli

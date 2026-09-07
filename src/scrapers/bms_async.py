@@ -1,57 +1,71 @@
-import asyncio
-import aiohttp
-import json
 import os
+import json
 import datetime
-from pathlib import Path
 import random
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import cloudscraper
 
 # Ensure output directory exists
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 VENUES_FILE = DATA_DIR / "bms_venues_master.json"
 
-HEADERS = {
-    "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 14; SM-S918B Build/UP1A.231005.007) BookMyShow/14.0.1",
-    "x-bms-id": "bms-android-app",
-    "x-platform": "ANDROID",
-    "x-app-version": "14.0.1",
-    "Accept-Encoding": "gzip, deflate, br"
-}
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/119.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/118.0.0.0 Safari/537.36",
+]
 
-def get_x_forwarded_for():
-    return f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
+def get_scraper():
+    scraper = cloudscraper.create_scraper(
+        browser={"browser": "chrome", "platform": "windows", "desktop": True}
+    )
+    scraper.headers.update({
+        "User-Agent": random.choice(USER_AGENTS),
+        "Accept": "application/json, text/plain, */*",
+        "Origin": "https://in.bookmyshow.com",
+        "Referer": "https://in.bookmyshow.com/",
+        "X-Forwarded-For": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
+    })
+    return scraper
 
-async def fetch_venue(session, venue_code, date_code, retries=3):
+def fetch_venue(venue_code, date_code, retries=3):
+    scraper = get_scraper()
     url = f"https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode={venue_code}&dateCode={date_code}"
     
-    headers = HEADERS.copy()
-    headers["X-Forwarded-For"] = get_x_forwarded_for()
-
     for attempt in range(retries):
         try:
-            async with session.get(url, headers=headers, timeout=10) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return {"venueCode": venue_code, "data": data}
-                elif response.status == 429:
-                    await asyncio.sleep(2 ** attempt)  # Exponential backoff
+            response = scraper.get(url, timeout=10)
+            if response.status_code == 200:
+                # Ensure it's valid JSON, not a Cloudflare HTML page
+                if not response.text.strip().startswith("{"):
+                    raise RuntimeError(f"Blocked by Cloudflare on {venue_code}")
+                return {"venueCode": venue_code, "data": response.json()}
+            elif response.status_code in [403, 429]:
+                # Regenerate scraper on block
+                scraper = get_scraper()
+                import time
+                time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
         except Exception as e:
             if attempt == retries - 1:
                 print(f"Error fetching {venue_code}: {e}")
     return {"venueCode": venue_code, "data": None}
 
-async def process_venues(venues, date_code, concurrency=50):
-    semaphore = asyncio.Semaphore(concurrency)
-    
-    async def sem_fetch(venue):
-        async with semaphore:
-            return await fetch_venue(session, venue["VenueCode"], date_code)
-            
-    async with aiohttp.ClientSession() as session:
-        tasks = [sem_fetch(venue) for venue in venues if venue.get("VenueCode")]
-        results = await asyncio.gather(*tasks)
-        return results
+def process_venues(venues, date_code, max_workers=10):
+    results = []
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_venue = {
+            executor.submit(fetch_venue, venue["VenueCode"], date_code): venue
+            for venue in venues if venue.get("VenueCode")
+        }
+        for future in as_completed(future_to_venue):
+            try:
+                res = future.result()
+                results.append(res)
+            except Exception as exc:
+                print(f"Venue generated an exception: {exc}")
+    return results
 
 def parse_bms_data(raw_results, date_code, target_date_str):
     final_sessions = []
@@ -69,15 +83,12 @@ def parse_bms_data(raw_results, date_code, target_date_str):
             movie_name = event.get("title", "")
             
             for show_date in event.get("showDates", []):
-                # Filter only for the requested date
                 if show_date.get("dateCode") != str(date_code):
                     continue
                     
                 for show in show_date.get("shows", []):
                     time_str = show.get("time", "")
                     
-                    # Some basic parsing for total/sold seats
-                    # BMS mobile API returns availability/categories
                     total_seats = 0
                     available_seats = 0
                     gross_revenue = 0
@@ -111,8 +122,8 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                     
     return final_sessions
 
-async def main():
-    print("🚀 Starting Async BMS Scraper...")
+def main():
+    print("🚀 Starting Sync BMS Scraper with Cloudscraper bypass...")
     if not VENUES_FILE.exists():
         print(f"❌ Error: {VENUES_FILE} not found!")
         return
@@ -132,14 +143,14 @@ async def main():
         print(f"🔹 Running Shard {shard_index+1}/{total_shards} - processing {len(venues)} venues.")
 
     # Scrape LIVE (Today)
-    today = datetime.date.today()
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30))).date()
     live_date_code = today.strftime("%Y%m%d")
     live_date_str = today.strftime("%Y-%m-%d")
     
     shard_suffix = f"_{shard_index}" if total_shards > 1 else ""
     
     print(f"📡 Fetching Live Data for {live_date_code}...")
-    live_raw = await process_venues(venues, live_date_code)
+    live_raw = process_venues(venues, live_date_code)
     live_parsed = parse_bms_data(live_raw, live_date_code, live_date_str)
     
     with open(DATA_DIR / f"latest_bms_data{shard_suffix}.json", "w") as f:
@@ -152,7 +163,7 @@ async def main():
     adv_date_str = tomorrow.strftime("%Y-%m-%d")
     
     print(f"📡 Fetching Advance Data for {adv_date_code}...")
-    adv_raw = await process_venues(venues, adv_date_code)
+    adv_raw = process_venues(venues, adv_date_code)
     adv_parsed = parse_bms_data(adv_raw, adv_date_code, adv_date_str)
     
     with open(DATA_DIR / f"latest_bms_advance_data{shard_suffix}.json", "w") as f:
@@ -160,4 +171,4 @@ async def main():
     print(f"✅ Saved {len(adv_parsed)} advance sessions.")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
