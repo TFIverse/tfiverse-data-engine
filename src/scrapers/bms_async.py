@@ -82,6 +82,7 @@ def parse_bms_data(raw_results, date_code, target_date_str):
         venue_code = result["venueCode"]
         venue = sd[0].get("Venues", {})
         venue_name = venue.get("VenueName", "")
+        chain = venue.get("VenueCompName", "Unknown")
         city = "Unknown"
         
         for ev in sd[0].get("Event", []):
@@ -97,6 +98,7 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                         continue
                         
                     time_str = sh.get("ShowTime", "")
+                    audi = sh.get("Attributes", "") or ""
                     total_seats = 0
                     available_seats = 0
                     gross_revenue = 0
@@ -111,22 +113,25 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                         sold_in_cat = seats_in_cat - avail_in_cat
                         if sold_in_cat > 0:
                             gross_revenue += (sold_in_cat * price)
-
+                            
                     sold_seats = total_seats - available_seats
                     
-                    final_sessions.append({
-                        "movie": movie,
-                        "venue": venue_name,
-                        "city": city,
-                        "date": target_date_str,
-                        "time": time_str,
-                        "totalSeats": total_seats,
-                        "soldSeats": sold_seats,
-                        "grossRevenue": gross_revenue,
-                        "source": "BMS",
-                        "venueId": venue_code,
-                        "showId": str(sh.get("SessionId", ""))
-                    })
+                    if total_seats > 0:
+                        final_sessions.append({
+                            "movie": movie,
+                            "venue": venue_name,
+                            "chain": chain,
+                            "city": city,
+                            "date": target_date_str,
+                            "time": time_str,
+                            "audi": audi,
+                            "totalSeats": total_seats,
+                            "soldSeats": sold_seats,
+                            "grossRevenue": gross_revenue,
+                            "source": "BMS",
+                            "venueId": venue_code,
+                            "showId": str(sh.get("SessionId", ""))
+                        })
                     
     return final_sessions
 
