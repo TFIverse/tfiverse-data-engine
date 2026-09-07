@@ -71,32 +71,40 @@ def parse_bms_data(raw_results, date_code, target_date_str):
     final_sessions = []
     
     for result in raw_results:
-        if not result["data"] or not result["data"].get("events"):
+        data = result.get("data")
+        if not data:
+            continue
+            
+        sd = data.get("ShowDetails", [])
+        if not sd:
             continue
             
         venue_code = result["venueCode"]
-        venue_info = result["data"].get("venue", {})
-        venue_name = venue_info.get("name", "")
-        city = venue_info.get("cityCode", "")
-
-        for event in result["data"]["events"]:
-            movie_name = event.get("title", "")
-            
-            for show_date in event.get("showDates", []):
-                if show_date.get("dateCode") != str(date_code):
-                    continue
-                    
-                for show in show_date.get("shows", []):
-                    time_str = show.get("time", "")
-                    
+        venue = sd[0].get("Venues", {})
+        venue_name = venue.get("VenueName", "")
+        city = "Unknown"
+        
+        for ev in sd[0].get("Event", []):
+            title = ev.get("EventTitle", "Unknown")
+            for ch in ev.get("ChildEvents", []):
+                dim  = ch.get("EventDimension", "").strip()
+                lang = ch.get("EventLanguage", "").strip()
+                suffix = " | ".join(x for x in (dim, lang) if x)
+                movie = f"{title} [{suffix}]" if suffix else title
+                
+                for sh in ch.get("ShowTimes", []):
+                    if str(sh.get("ShowDateCode")) != str(date_code):
+                        continue
+                        
+                    time_str = sh.get("ShowTime", "")
                     total_seats = 0
                     available_seats = 0
                     gross_revenue = 0
                     
-                    for cat in show.get("categories", []):
-                        seats_in_cat = int(cat.get("totalSeats", 0) if str(cat.get("totalSeats")).isdigit() else 0)
-                        avail_in_cat = int(cat.get("availableSeats", 0) if str(cat.get("availableSeats")).isdigit() else 0)
-                        price = float(cat.get("price", 0))
+                    for cat in sh.get("Categories", []):
+                        seats_in_cat = int(cat.get("MaxSeats", 0) if str(cat.get("MaxSeats")).isdigit() else 0)
+                        avail_in_cat = int(cat.get("SeatsAvail", 0) if str(cat.get("SeatsAvail")).isdigit() else 0)
+                        price = float(cat.get("CurPrice", 0))
                         
                         total_seats += seats_in_cat
                         available_seats += avail_in_cat
@@ -107,7 +115,7 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                     sold_seats = total_seats - available_seats
                     
                     final_sessions.append({
-                        "movie": movie_name,
+                        "movie": movie,
                         "venue": venue_name,
                         "city": city,
                         "date": target_date_str,
@@ -117,7 +125,7 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                         "grossRevenue": gross_revenue,
                         "source": "BMS",
                         "venueId": venue_code,
-                        "showId": show.get("id", "")
+                        "showId": str(sh.get("SessionId", ""))
                     })
                     
     return final_sessions
