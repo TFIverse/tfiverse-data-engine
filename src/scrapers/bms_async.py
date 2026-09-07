@@ -30,41 +30,36 @@ def get_scraper():
     })
     return scraper
 
-def fetch_venue(venue_code, date_code, retries=3):
-    scraper = get_scraper()
-    url = f"https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode={venue_code}&dateCode={date_code}"
-    
-    for attempt in range(retries):
-        try:
-            response = scraper.get(url, timeout=10)
-            if response.status_code == 200:
-                # Ensure it's valid JSON, not a Cloudflare HTML page
-                if not response.text.strip().startswith("{"):
-                    raise RuntimeError(f"Blocked by Cloudflare on {venue_code}")
-                return {"venueCode": venue_code, "data": response.json()}
-            elif response.status_code in [403, 429]:
-                # Regenerate scraper on block
-                scraper = get_scraper()
-                import time
-                time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
-        except Exception as e:
-            if attempt == retries - 1:
-                print(f"Error fetching {venue_code}: {e}")
-    return {"venueCode": venue_code, "data": None}
-
-def process_venues(venues, date_code, max_workers=10):
+def process_venues(venues, date_code, retries=3):
     results = []
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_venue = {
-            executor.submit(fetch_venue, venue["VenueCode"], date_code): venue
-            for venue in venues if venue.get("VenueCode")
-        }
-        for future in as_completed(future_to_venue):
+    scraper = get_scraper()
+    
+    for i, venue in enumerate(venues):
+        venue_code = venue.get("VenueCode")
+        if not venue_code:
+            continue
+            
+        url = f"https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode={venue_code}&dateCode={date_code}"
+        
+        for attempt in range(retries):
             try:
-                res = future.result()
-                results.append(res)
-            except Exception as exc:
-                print(f"Venue generated an exception: {exc}")
+                response = scraper.get(url, timeout=10)
+                if response.status_code == 200:
+                    # Ensure it's valid JSON, not a Cloudflare HTML page
+                    if not response.text.strip().startswith("{"):
+                        raise RuntimeError(f"Blocked by Cloudflare on {venue_code}")
+                    results.append({"venueCode": venue_code, "data": response.json()})
+                    break
+                elif response.status_code in [403, 429]:
+                    scraper = get_scraper()
+                    time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
+            except Exception as e:
+                if attempt == retries - 1:
+                    print(f"Error fetching {venue_code}: {e}")
+        
+        # Avoid rate limits by sleeping
+        time.sleep(random.uniform(0.35, 0.7))
+        
     return results
 
 def parse_bms_data(raw_results, date_code, target_date_str):

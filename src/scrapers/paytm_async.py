@@ -30,39 +30,35 @@ def get_scraper():
     })
     return scraper
 
-def fetch_venue(venue_id, date_str, retries=3):
-    url = f"https://apiproxy.paytm.com/v3/movies/search/movie?cinema_id={venue_id}&date={date_str}"
+def process_venues(venues, date_str, retries=3):
+    results = []
     scraper = get_scraper()
     
-    for attempt in range(retries):
-        try:
-            response = scraper.get(url, timeout=10)
-            if response.status_code == 200:
-                if not response.text.strip().startswith("{"):
-                    raise RuntimeError(f"Blocked by anti-bot on {venue_id}")
-                return {"venueId": venue_id, "data": response.json()}
-            elif response.status_code in [403, 429]:
-                scraper = get_scraper()
-                import time
-                time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
-        except Exception as e:
-            if attempt == retries - 1:
-                print(f"Error fetching {venue_id}: {e}")
-    return {"venueId": venue_id, "data": None}
-
-def process_venues(venues, date_str, max_workers=10):
-    results = []
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_venue = {
-            executor.submit(fetch_venue, venue.get("id"), date_str): venue
-            for venue in venues if venue.get("id")
-        }
-        for future in as_completed(future_to_venue):
+    for venue in venues:
+        venue_id = venue.get("id")
+        if not venue_id:
+            continue
+            
+        url = f"https://apiproxy.paytm.com/v3/movies/search/movie?cinema_id={venue_id}&date={date_str}"
+        
+        for attempt in range(retries):
             try:
-                res = future.result()
-                results.append(res)
-            except Exception as exc:
-                print(f"Venue generated an exception: {exc}")
+                response = scraper.get(url, timeout=10)
+                if response.status_code == 200:
+                    if not response.text.strip().startswith("{"):
+                        raise RuntimeError(f"Blocked by anti-bot on {venue_id}")
+                    results.append({"venueId": venue_id, "data": response.json()})
+                    break
+                elif response.status_code in [403, 429]:
+                    scraper = get_scraper()
+                    time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
+            except Exception as e:
+                if attempt == retries - 1:
+                    print(f"Error fetching {venue_id}: {e}")
+                    
+        import time
+        time.sleep(random.uniform(0.35, 0.7))
+        
     return results
 
 def parse_paytm_data(raw_results, date_str):
