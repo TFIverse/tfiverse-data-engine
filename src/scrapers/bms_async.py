@@ -102,27 +102,65 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                         
                     time_str = sh.get("ShowTime", "")
                     audi = sh.get("Attributes", "") or ""
+                    
+                    # Skip cancelled shows
+                    show_status = str(sh.get("ShowStatus", "")).lower()
+                    if "cancel" in show_status or "suspend" in show_status:
+                        continue
+                        
                     total_seats = 0
                     available_seats = 0
                     gross_revenue = 0
+                    categories_list = []
                     
                     for cat in sh.get("Categories", []):
-                        seats_in_cat = int(cat.get("MaxSeats", 0) if str(cat.get("MaxSeats")).isdigit() else 0)
-                        avail_in_cat = int(cat.get("SeatsAvail", 0) if str(cat.get("SeatsAvail")).isdigit() else 0)
+                        # Safely parse numeric fields
+                        def parse_int(val):
+                            return int(val) if str(val).lstrip('-').isdigit() else 0
+                            
+                        seats_in_cat = parse_int(cat.get("MaxSeats", 0))
+                        avail_in_cat = parse_int(cat.get("SeatsAvail", 0))
+                        
+                        # Sometimes Blocked Seats are omitted, but sometimes present
+                        # Usually SeatsAvail + Sold + Blocked = MaxSeats
+                        # A safer calculation for Sold is (MaxSeats - SeatsAvail)
+                        # BMS sometimes reports SeatsAvail as negative if overbooked
+                        if avail_in_cat < 0:
+                            avail_in_cat = 0
+                            
                         price = float(cat.get("CurPrice", 0))
+                        sold_in_cat = max(0, seats_in_cat - avail_in_cat)
                         
                         total_seats += seats_in_cat
                         available_seats += avail_in_cat
-                        sold_in_cat = seats_in_cat - avail_in_cat
+                        
                         if sold_in_cat > 0:
                             gross_revenue += (sold_in_cat * price)
                             
+                        categories_list.append({
+                            "name": cat.get("PriceDesc", "Unknown"),
+                            "price": price,
+                            "total": seats_in_cat,
+                            "sold": sold_in_cat,
+                            "available": avail_in_cat
+                        })
+                            
                     sold_seats = total_seats - available_seats
+                    
+                    # Calculate fast filling and housefull statuses
+                    is_housefull = (available_seats == 0 and total_seats > 0)
+                    is_fast_filling = (sold_seats >= (total_seats * 0.8)) and not is_housefull
+                    
+                    poster_url = ""
+                    image_code = ev.get("EventImageCode")
+                    if image_code:
+                        poster_url = f"https://assets-in.bmscdn.com/iedb/movies/images/mobile/thumbnail/xlarge/{image_code}.jpg"
                     
                     if total_seats > 0:
                         final_sessions.append({
                             "movieId": movie_id,
                             "movie": movie,
+                            "posterUrl": poster_url,
                             "venue": venue_name,
                             "chain": chain,
                             "city": city,
@@ -134,6 +172,9 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                             "totalSeats": total_seats,
                             "soldSeats": sold_seats,
                             "grossRevenue": gross_revenue,
+                            "categories": json.dumps(categories_list),
+                            "isHousefull": is_housefull,
+                            "isFastFilling": is_fast_filling,
                             "source": "BMS",
                             "venueId": venue_code,
                             "showId": str(sh.get("SessionId", ""))

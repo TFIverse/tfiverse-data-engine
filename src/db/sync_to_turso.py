@@ -43,7 +43,8 @@ def init_db():
         ("""
         CREATE TABLE IF NOT EXISTS movies (
             id TEXT PRIMARY KEY,
-            title TEXT NOT NULL
+            title TEXT NOT NULL,
+            poster_url TEXT
         )
         """, []),
         ("""
@@ -67,6 +68,9 @@ def init_db():
             total_seats INTEGER,
             sold_seats INTEGER,
             gross_revenue REAL,
+            categories_json TEXT,
+            is_housefull BOOLEAN DEFAULT 0,
+            is_fast_filling BOOLEAN DEFAULT 0,
             source TEXT,
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -90,10 +94,12 @@ def sync_data(filename):
         # 1. Upsert Movie
         statements.append((
             """
-            INSERT INTO movies (id, title) VALUES (?, ?)
-            ON CONFLICT(id) DO UPDATE SET title=excluded.title
+            INSERT INTO movies (id, title, poster_url) VALUES (?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET 
+                title=excluded.title,
+                poster_url=COALESCE(excluded.poster_url, poster_url)
             """, 
-            [s.get("movieId", "UNKNOWN"), s.get("movie", "Unknown")]
+            [s.get("movieId", "UNKNOWN"), s.get("movie", "Unknown"), s.get("posterUrl", "")]
         ))
         
         # 2. Upsert Venue
@@ -119,12 +125,16 @@ def sync_data(filename):
             """
             INSERT INTO box_office_sessions (
                 show_id, movie_id, venue_id, show_date, show_time, audi, 
-                total_seats, sold_seats, gross_revenue, source, last_updated
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                total_seats, sold_seats, gross_revenue, categories_json, 
+                is_housefull, is_fast_filling, source, last_updated
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(show_id) DO UPDATE SET 
                 total_seats=excluded.total_seats,
                 sold_seats=excluded.sold_seats,
                 gross_revenue=excluded.gross_revenue,
+                categories_json=excluded.categories_json,
+                is_housefull=excluded.is_housefull,
+                is_fast_filling=excluded.is_fast_filling,
                 last_updated=CURRENT_TIMESTAMP
             """,
             [
@@ -137,6 +147,9 @@ def sync_data(filename):
                 int(s.get("totalSeats", 0)),
                 int(s.get("soldSeats", 0)),
                 float(s.get("grossRevenue", 0.0)),
+                s.get("categories", "[]"),
+                1 if s.get("isHousefull") else 0,
+                1 if s.get("isFastFilling") else 0,
                 s.get("source", "BMS")
             ]
         ))
