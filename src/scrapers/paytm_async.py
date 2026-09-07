@@ -35,10 +35,14 @@ def process_venues(venues, date_str, retries=3):
     results = []
     scraper = get_scraper()
     
-    for venue in venues:
+    for i, venue in enumerate(venues):
         venue_id = venue.get("id")
         if not venue_id:
             continue
+            
+        # Identity Rotation: Reset fake IP and User-Agent every 10 requests
+        if i > 0 and i % 10 == 0:
+            scraper = get_scraper()
             
         url = f"https://apiproxy.paytm.com/v3/movies/search/movie?cinema_id={venue_id}&date={date_str}"
         

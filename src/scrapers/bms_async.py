@@ -40,6 +40,10 @@ def process_venues(venues, date_code, retries=3):
         if not venue_code:
             continue
             
+        # Identity Rotation: Reset fake IP and User-Agent every 10 requests
+        if i > 0 and i % 10 == 0:
+            scraper = get_scraper()
+            
         url = f"https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode={venue_code}&dateCode={date_code}"
         
         for attempt in range(retries):
