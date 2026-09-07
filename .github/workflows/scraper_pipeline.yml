@@ -68,3 +68,9 @@ jobs:
           git add data/latest_bms_*.json
           git commit -m "🚀 Auto-update live and advance box office data [skip ci]" || echo "No changes to commit"
           git push
+
+      - name: Sync to Turso Database
+        env:
+          TURSO_URL: ${{ secrets.TURSO_URL }}
+          TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
+        run: python src/db/sync_to_turso.py
