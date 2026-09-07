@@ -46,3 +46,5 @@ if __name__ == "__main__":
     print("📦 Starting Backblaze B2 Backup...")
     backup_file("latest_bms_data.json", "bms_live")
     backup_file("latest_bms_advance_data.json", "bms_advance")
+    backup_file("latest_paytm_data.json", "paytm_live")
+    backup_file("latest_paytm_advance_data.json", "paytm_advance")

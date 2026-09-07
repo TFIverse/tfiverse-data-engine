@@ -30,6 +30,12 @@ jobs:
           TOTAL_SHARDS: 9
         run: python src/scrapers/bms_async.py
 
+      - name: Run Paytm Scraper Shard (Live + Advance)
+        env:
+          SHARD_INDEX: ${{ matrix.shard }}
+          TOTAL_SHARDS: 9
+        run: python src/scrapers/paytm_async.py
+
       - name: Upload Shard Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -69,8 +75,9 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/latest_bms_*.json
+          git add data/latest_bms_*.json data/latest_paytm_*.json
           git commit -m "🚀 Auto-update live and advance box office data [skip ci]" || echo "No changes to commit"
+          git pull origin main --rebase
           git push
 
       - name: Sync to Turso Database

@@ -156,3 +156,5 @@ if __name__ == "__main__":
     init_db()
     sync_data("latest_bms_data.json")
     sync_data("latest_bms_advance_data.json")
+    sync_data("latest_paytm_data.json")
+    sync_data("latest_paytm_advance_data.json")
