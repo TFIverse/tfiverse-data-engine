@@ -83,10 +83,13 @@ def parse_bms_data(raw_results, date_code, target_date_str):
         venue = sd[0].get("Venues", {})
         venue_name = venue.get("VenueName", "")
         chain = venue.get("VenueCompName", "Unknown")
+        lat = venue.get("VenueLatitude", "")
+        lng = venue.get("VenueLongitude", "")
         city = "Unknown"
         
         for ev in sd[0].get("Event", []):
             title = ev.get("EventTitle", "Unknown")
+            movie_id = ev.get("EventCode", "")
             for ch in ev.get("ChildEvents", []):
                 dim  = ch.get("EventDimension", "").strip()
                 lang = ch.get("EventLanguage", "").strip()
@@ -118,10 +121,13 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                     
                     if total_seats > 0:
                         final_sessions.append({
+                            "movieId": movie_id,
                             "movie": movie,
                             "venue": venue_name,
                             "chain": chain,
                             "city": city,
+                            "lat": lat,
+                            "lng": lng,
                             "date": target_date_str,
                             "time": time_str,
                             "audi": audi,
@@ -132,7 +138,7 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                             "venueId": venue_code,
                             "showId": str(sh.get("SessionId", ""))
                         })
-                    
+                        
     return final_sessions
 
 def main():
