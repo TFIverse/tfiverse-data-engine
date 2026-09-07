@@ -1,0 +1,70 @@
+name: Box Office Scraper Pipeline
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Every 1 hour (24 times a day)
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  scrape-shards:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Dependencies
+        run: |
+          pip install cloudscraper aiohttp nest_asyncio
+
+      - name: Run BookMyShow Scraper Shard (Live + Advance)
+        env:
+          SHARD_INDEX: ${{ matrix.shard }}
+          TOTAL_SHARDS: 9
+        run: python src/scrapers/bms_async.py
+
+      - name: Upload Shard Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: shards-data-${{ matrix.shard }}
+          path: data/*.json
+          retention-days: 1
+
+  combine-and-commit:
+    needs: scrape-shards
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Shard Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: shards-data-*
+          merge-multiple: true
+          path: data/
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Combine Shards
+        run: python src/combiner/aggregate.py
+
+      - name: Commit and Push Combined Data
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/latest_bms_*.json
+          git commit -m "🚀 Auto-update live and advance box office data [skip ci]" || echo "No changes to commit"
+          git push
