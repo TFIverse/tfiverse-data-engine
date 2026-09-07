@@ -83,6 +83,6 @@ jobs:
         env:
           B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
           B2_APPLICATION_KEY: ${{ secrets.B2_APPLICATION_KEY }}
-          B2_BUCKET_NAME: "fiverse-backups"
+          B2_BUCKET_NAME: "tfiverse-backups"
           B2_ENDPOINT: "s3.us-west-004.backblazeb2.com"
         run: python src/db/backup_to_b2.py
