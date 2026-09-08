@@ -6,7 +6,36 @@ on:
   workflow_dispatch: # Allows manual trigger
 
 jobs:
+  discover-venues:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Dependencies
+        run: pip install cloudscraper
+
+      - name: Run Venue Discovery Engine
+        run: python src/scrapers/venue_discovery.py
+
+      - name: Commit Discovered Venues
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/bms_venues_master.json
+          git commit -m "🗺️ Auto-Discovered new venues [skip ci]" || echo "No new venues"
+          git pull origin main --rebase
+          git push
+
   scrape-shards:
+    needs: discover-venues
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -70,21 +99,6 @@ jobs:
 
       - name: Combine Shards
         run: python src/combiner/aggregate.py
-
-      - name: Commit and Push Combined Data
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/latest_bms_*.json data/latest_paytm_*.json
-          git commit -m "🚀 Auto-update live and advance box office data [skip ci]" || echo "No changes to commit"
-          git pull origin main --rebase
-          git push
-
-      - name: Sync to Turso Database
-        env:
-          TURSO_URL: ${{ secrets.TURSO_URL }}
-          TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
-        run: python src/db/sync_to_turso.py
 
       - name: Backup to Backblaze B2
         env:

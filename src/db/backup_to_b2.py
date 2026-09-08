@@ -30,15 +30,21 @@ def backup_file(filename, prefix):
         config=Config(signature_version='s3v4')
     )
     
-    # Generate timestamped filename
+    # Generate timestamped filename for the historical chunk
     now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30)))
     timestamp = now.strftime("%Y-%m-%d_%H%M")
-    b2_filename = f"{prefix}_{timestamp}.json"
+    date_folder = now.strftime("%Y-%m-%d")
     
-    print(f"🔄 Uploading {filename} to B2 as {b2_filename}...")
+    chunk_filename = f"chunks/{date_folder}/{prefix}_{timestamp}.json"
+    latest_filename = f"LATEST_{prefix}.json"
+    
+    print(f"🔄 Uploading {filename} to B2 as {chunk_filename} and {latest_filename}...")
     try:
-        b2.upload_file(str(file_path), B2_BUCKET_NAME, b2_filename)
-        print(f"✅ Successfully backed up to B2: {b2_filename}")
+        # Upload the historical chunk
+        b2.upload_file(str(file_path), B2_BUCKET_NAME, chunk_filename)
+        # Upload the overwriting LATEST file so the VPS can easily fetch it
+        b2.upload_file(str(file_path), B2_BUCKET_NAME, latest_filename)
+        print(f"✅ Successfully backed up to B2")
     except Exception as e:
         print(f"❌ B2 Upload Error: {e}")
 
