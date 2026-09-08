@@ -1,151 +1,138 @@
 import os
 import json
 import datetime
-import random
-import time
+import urllib.request
+import urllib.error
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import cloudscraper
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 VENUES_FILE = DATA_DIR / "paytm_venues_master.json"
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/118.0.0.0 Safari/537.36",
-]
-
-def get_scraper():
-    scraper = cloudscraper.create_scraper(
-        browser={"browser": "chrome", "platform": "windows", "desktop": True}
-    )
-    scraper.headers.update({
-        "User-Agent": random.choice(USER_AGENTS),
-        "Accept": "application/json",
-        "client": "ticketnew",
-        "Origin": "https://ticketnew.com",
-        "Referer": "https://ticketnew.com/",
-        "X-Forwarded-For": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
-    })
-    return scraper
-
-def process_venues(venues, date_str, retries=3):
-    results = []
-    scraper = get_scraper()
-    
-    for i, venue in enumerate(venues):
-        venue_id = venue.get("id")
-        if not venue_id:
+def reverse_dictionary(dictionary):
+    if not isinstance(dictionary, dict):
+        return {}
+    result = {}
+    for key, value in dictionary.items():
+        try:
+            numeric_value = int(value)
+        except (TypeError, ValueError):
             continue
-            
-        # Identity Rotation: Reset fake IP and User-Agent every 10 requests
-        if i > 0 and i % 10 == 0:
-            scraper = get_scraper()
-            
-        url = f"https://apiproxy.paytm.com/v3/movies/search/movie?cinema_id={venue_id}&date={date_str}"
-        
-        for attempt in range(retries):
-            try:
-                response = scraper.get(url, timeout=10)
-                if response.status_code == 200:
-                    if not response.text.strip().startswith("{"):
-                        raise RuntimeError(f"Blocked by anti-bot on {venue_id}")
-                    results.append({"venueId": venue_id, "data": response.json()})
-                    break
-                elif response.status_code in [403, 429]:
-                    scraper = get_scraper()
-                    time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
-            except Exception as e:
-                if attempt == retries - 1:
-                    print(f"Error fetching {venue_id}: {e}")
-                    
-        import time
-        time.sleep(random.uniform(0.35, 0.7))
-        
-    return results
+        result[numeric_value] = key
+    return result
 
-def parse_paytm_data(raw_results, date_str):
+def decompress_and_parse(data, date_str):
+    if not data or not isinstance(data, dict): return []
+    
+    dicts = data.get("dicts", {})
+    rev = {
+        "cities": reverse_dictionary(dicts.get("cities", {})),
+        "states": reverse_dictionary(dicts.get("states", {})),
+        "venues": reverse_dictionary(dicts.get("venues", {})),
+        "chains": reverse_dictionary(dicts.get("chains", {})),
+        "showtimes": reverse_dictionary(dicts.get("showtimes", {})),
+        "audis": reverse_dictionary(dicts.get("audis", {}))
+    }
+    
     final_sessions = []
     
-    for result in raw_results:
-        if not result["data"] or not result["data"].get("movies"):
-            continue
-            
-        venue_id = result["venueId"]
+    movies = data.get("movies", {})
+    for raw_movie_key, rows in movies.items():
+        if not isinstance(rows, list): continue
         
-        for movie in result["data"].get("movies", []):
-            movie_name = movie.get("name", "")
+        # Parse movie name
+        if "|" in raw_movie_key:
+            parts = [p.strip() for p in raw_movie_key.split("|")]
+            movie_name = parts[0] if parts else raw_movie_key
+            language = parts[-1] if len(parts) > 1 else "Unknown"
+        else:
+            movie_name = raw_movie_key.strip()
+            language = "Unknown"
             
-            for session in movie.get("sessions", []):
-                time_str = session.get("showTime", "")
-                total_seats = int(session.get("totalSeats", 0))
-                available_seats = int(session.get("availableSeats", 0))
-                price = float(session.get("price", 0))
-                
-                sold_seats = total_seats - available_seats
-                gross_revenue = sold_seats * price
-                
-                final_sessions.append({
-                    "movie": movie_name,
-                    "venue": str(venue_id),
-                    "city": "Unknown", # Typically fetched from venue master
-                    "date": date_str,
-                    "time": time_str,
-                    "totalSeats": total_seats,
-                    "soldSeats": sold_seats,
-                    "grossRevenue": gross_revenue,
-                    "source": "PAYTM",
-                    "venueId": venue_id,
-                    "showId": session.get("sessionId", "")
-                })
-                    
+        movie_key = f"{movie_name} [2D | {language}]" if language != "Unknown" else movie_name
+        
+        for row in rows:
+            if len(row) < 12: continue
+            city_id, state_id, venue_id_num, chain_id, time_id, audi_id = row[0], row[1], row[2], row[3], row[4], row[5]
+            
+            total = int(row[6] or 0)
+            available = int(row[7] or 0)
+            sold = int(row[8] or 0)
+            gross_cents = int(row[9] or 0)
+            gross = gross_cents / 100.0
+            
+            venue_id = str(venue_id_num)
+            city = rev["cities"].get(city_id, "Unknown")
+            state = rev["states"].get(state_id, "Unknown")
+            venue = rev["venues"].get(venue_id_num, "Unknown")
+            time_str = rev["showtimes"].get(time_id, "")
+            
+            final_sessions.append({
+                "movie": movie_key,
+                "venue": venue,
+                "city": city,
+                "state": state,
+                "date": date_str,
+                "time": time_str,
+                "totalSeats": total,
+                "soldSeats": sold,
+                "grossRevenue": gross,
+                "source": "PAYTM",
+                "venueId": venue_id,
+                "showId": f"PAYTM_{venue_id}_{time_str.replace(' ', '')}"
+            })
+            
     return final_sessions
 
+def fetch_data(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except Exception as e:
+        print(f"Failed to fetch {url}: {e}")
+        return None
+
 def main():
-    print("🚀 Starting Sync Paytm Scraper with Cloudscraper bypass...")
-    if not VENUES_FILE.exists():
-        print(f"❌ Error: {VENUES_FILE} not found!")
-        return
-
-    with open(VENUES_FILE, "r") as f:
-        venues = json.load(f)
-
-    # Sharding Logic
-    shard_index = int(os.environ.get("SHARD_INDEX", 0))
-    total_shards = int(os.environ.get("TOTAL_SHARDS", 1))
+    print("🚀 Starting Sync Paytm Scraper (via districtdata2026 proxy)...")
     
-    if total_shards > 1:
-        chunk_size = len(venues) // total_shards
-        start_idx = shard_index * chunk_size
-        end_idx = start_idx + chunk_size if shard_index < total_shards - 1 else len(venues)
-        venues = venues[start_idx:end_idx]
-        print(f"🔹 Running Shard {shard_index+1}/{total_shards} - processing {len(venues)} venues.")
-
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30))).date()
-    live_date_str = today.strftime("%Y-%m-%d")
     
-    shard_suffix = f"_{shard_index}" if total_shards > 1 else ""
-    
-    print(f"📡 Fetching Live Data for {live_date_str}...")
-    live_raw = process_venues(venues, live_date_str)
-    live_parsed = parse_paytm_data(live_raw, live_date_str)
-    
-    with open(DATA_DIR / f"latest_paytm_data{shard_suffix}.json", "w") as f:
-        json.dump(live_parsed, f, indent=2)
-    print(f"✅ Saved {len(live_parsed)} live sessions.")
+    # Try fetching daily for today, if not try yesterday
+    live_parsed = []
+    live_date_str = ""
+    for d in [today, today - datetime.timedelta(days=1)]:
+        d_str = d.strftime("%Y-%m-%d")
+        live_url = f"https://districtdata2026.pages.dev/boxoffice/{d_str}_Detailed.json"
+        print(f"📡 Trying Live Data from {live_url}...")
+        live_data = fetch_data(live_url)
+        if live_data:
+            live_parsed = decompress_and_parse(live_data, d_str)
+            live_date_str = d_str
+            break
 
-    tomorrow = today + datetime.timedelta(days=1)
-    adv_date_str = tomorrow.strftime("%Y-%m-%d")
+    if live_parsed:
+        with open(DATA_DIR / "latest_paytm_data.json", "w") as f:
+            json.dump(live_parsed, f, indent=2)
+        print(f"✅ Saved {len(live_parsed)} live sessions for {live_date_str}.")
     
-    print(f"📡 Fetching Advance Data for {adv_date_str}...")
-    adv_raw = process_venues(venues, adv_date_str)
-    adv_parsed = parse_paytm_data(adv_raw, adv_date_str)
-    
-    with open(DATA_DIR / f"latest_paytm_advance_data{shard_suffix}.json", "w") as f:
-        json.dump(adv_parsed, f, indent=2)
-    print(f"✅ Saved {len(adv_parsed)} advance sessions.")
+    # Try fetching advance for tomorrow, if not try today
+    adv_parsed = []
+    adv_date_str = ""
+    for d in [today + datetime.timedelta(days=1), today]:
+        d_str = d.strftime("%Y-%m-%d")
+        adv_url = f"https://districtdata2026.pages.dev/advance/{d_str}_Detailed.json"
+        print(f"📡 Trying Advance Data from {adv_url}...")
+        adv_data = fetch_data(adv_url)
+        if adv_data:
+            adv_parsed = decompress_and_parse(adv_data, d_str)
+            adv_date_str = d_str
+            break
+
+    if adv_parsed:
+        with open(DATA_DIR / "latest_paytm_advance_data.json", "w") as f:
+            json.dump(adv_parsed, f, indent=2)
+        print(f"✅ Saved {len(adv_parsed)} advance sessions for {adv_date_str}.")
 
 if __name__ == "__main__":
     main()

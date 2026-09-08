@@ -3,8 +3,16 @@ import json
 import urllib.request
 import urllib.parse
 from pathlib import Path
+import hashlib
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
+
+def get_movie_id(s):
+    m_id = s.get("movieId")
+    if m_id and str(m_id).strip() not in ["", "UNKNOWN"]:
+        return str(m_id).strip()
+    title = s.get("movie", "Unknown").strip()
+    return "MOV_" + hashlib.md5(title.encode()).hexdigest()[:12]
 
 # Turso HTTP API configuration
 TURSO_URL = os.environ.get("TURSO_URL", "https://tfiverse-tfiverse.aws-ap-south-1.turso.io")
@@ -91,6 +99,8 @@ def sync_data(filename):
     statements = []
     
     for s in sessions:
+        movie_id = get_movie_id(s)
+        
         # 1. Upsert Movie
         statements.append((
             """
@@ -99,7 +109,7 @@ def sync_data(filename):
                 title=excluded.title,
                 poster_url=COALESCE(excluded.poster_url, poster_url)
             """, 
-            [s.get("movieId", "UNKNOWN"), s.get("movie", "Unknown"), s.get("posterUrl", "")]
+            [movie_id, s.get("movie", "Unknown"), s.get("posterUrl", "")]
         ))
         
         # 2. Upsert Venue
@@ -139,7 +149,7 @@ def sync_data(filename):
             """,
             [
                 s.get("showId", "UNKNOWN"),
-                s.get("movieId", "UNKNOWN"),
+                movie_id,
                 s.get("venueId", "UNKNOWN"),
                 s.get("date", ""),
                 s.get("time", ""),
