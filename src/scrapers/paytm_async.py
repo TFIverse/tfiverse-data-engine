@@ -116,23 +116,24 @@ def main():
             json.dump(live_parsed, f, indent=2)
         print(f"✅ Saved {len(live_parsed)} live sessions for {live_date_str}.")
     
-    # Try fetching advance for tomorrow, if not try today
+    # Fetch Deep Advance (Days 1 to 5)
     adv_parsed = []
-    adv_date_str = ""
-    for d in [today + datetime.timedelta(days=1), today]:
+    print(f"📡 Fetching Deep Advance Data (Days 1 to 5)...")
+    
+    for day_offset in range(1, 6):
+        d = today + datetime.timedelta(days=day_offset)
         d_str = d.strftime("%Y-%m-%d")
         adv_url = f"https://districtdata2026.pages.dev/advance/{d_str}_Detailed.json"
-        print(f"📡 Trying Advance Data from {adv_url}...")
+        print(f"   -> Trying Advance Data from {adv_url} (+{day_offset} Days)...")
         adv_data = fetch_data(adv_url)
         if adv_data:
-            adv_parsed = decompress_and_parse(adv_data, d_str)
-            adv_date_str = d_str
-            break
+            parsed_day = decompress_and_parse(adv_data, d_str)
+            adv_parsed.extend(parsed_day)
 
     if adv_parsed:
         with open(DATA_DIR / "latest_paytm_advance_data.json", "w") as f:
             json.dump(adv_parsed, f, indent=2)
-        print(f"✅ Saved {len(adv_parsed)} advance sessions for {adv_date_str}.")
+        print(f"✅ Saved {len(adv_parsed)} total advance sessions across 5 days.")
 
 if __name__ == "__main__":
     main()

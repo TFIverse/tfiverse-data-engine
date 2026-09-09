@@ -217,18 +217,23 @@ def main():
         json.dump(live_parsed, f, indent=2)
     print(f"✅ Saved {len(live_parsed)} live sessions.")
 
-    # Scrape ADVANCE (Tomorrow)
-    tomorrow = today + datetime.timedelta(days=1)
-    adv_date_code = tomorrow.strftime("%Y%m%d")
-    adv_date_str = tomorrow.strftime("%Y-%m-%d")
+    # Scrape ADVANCE (Days 1 to 5)
+    adv_parsed = []
+    print(f"📡 Fetching Deep Advance Data (Days 1 to 5)...")
     
-    print(f"📡 Fetching Advance Data for {adv_date_code}...")
-    adv_raw = process_venues(venues, adv_date_code)
-    adv_parsed = parse_bms_data(adv_raw, adv_date_code, adv_date_str)
+    for day_offset in range(1, 6):
+        target_date = today + datetime.timedelta(days=day_offset)
+        adv_date_code = target_date.strftime("%Y%m%d")
+        adv_date_str = target_date.strftime("%Y-%m-%d")
+        
+        print(f"   -> Fetching Advance Data for {adv_date_code} (+{day_offset} Days)")
+        adv_raw = process_venues(venues, adv_date_code)
+        parsed_day = parse_bms_data(adv_raw, adv_date_code, adv_date_str)
+        adv_parsed.extend(parsed_day)
     
     with open(DATA_DIR / f"latest_bms_advance_data{shard_suffix}.json", "w") as f:
         json.dump(adv_parsed, f, indent=2)
-    print(f"✅ Saved {len(adv_parsed)} advance sessions.")
+    print(f"✅ Saved {len(adv_parsed)} total advance sessions across 5 days.")
 
 if __name__ == "__main__":
     main()
