@@ -116,11 +116,16 @@ def main():
             json.dump(live_parsed, f, indent=2)
         print(f"✅ Saved {len(live_parsed)} live sessions for {live_date_str}.")
     
-    # Fetch Deep Advance (Days 1 to 5)
+    # Fetch ADVANCE
     adv_parsed = []
-    print(f"📡 Fetching Deep Advance Data (Days 1 to 5)...")
     
-    for day_offset in range(1, 6):
+    deep_advance = os.environ.get("DEEP_ADVANCE", "false").lower() == "true"
+    max_days = 6 if deep_advance else 2
+    
+    day_label = "Deep Advance (Days 1 to 5)" if deep_advance else "Advance (Tomorrow)"
+    print(f"📡 Fetching {day_label} Data...")
+    
+    for day_offset in range(1, max_days):
         d = today + datetime.timedelta(days=day_offset)
         d_str = d.strftime("%Y-%m-%d")
         adv_url = f"https://districtdata2026.pages.dev/advance/{d_str}_Detailed.json"

@@ -217,11 +217,17 @@ def main():
         json.dump(live_parsed, f, indent=2)
     print(f"✅ Saved {len(live_parsed)} live sessions.")
 
-    # Scrape ADVANCE (Days 1 to 5)
+    # Scrape ADVANCE
     adv_parsed = []
-    print(f"📡 Fetching Deep Advance Data (Days 1 to 5)...")
     
-    for day_offset in range(1, 6):
+    # Only scrape deep advance (5 days) if requested, otherwise just Tomorrow (1 day) to avoid Cloudflare bans
+    deep_advance = os.environ.get("DEEP_ADVANCE", "false").lower() == "true"
+    max_days = 6 if deep_advance else 2
+    
+    day_label = "Deep Advance (Days 1 to 5)" if deep_advance else "Advance (Tomorrow)"
+    print(f"📡 Fetching {day_label} Data...")
+    
+    for day_offset in range(1, max_days):
         target_date = today + datetime.timedelta(days=day_offset)
         adv_date_code = target_date.strftime("%Y%m%d")
         adv_date_str = target_date.strftime("%Y-%m-%d")
