@@ -1,0 +1,84 @@
+name: Deep Advance Box Office Pipeline
+
+on:
+  schedule:
+    - cron: '30 */3 * * *' # Every 3 hours at minute 30 (e.g. 1:30, 4:30, 7:30)
+  workflow_dispatch:
+
+jobs:
+  scrape-deep-advance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install Dependencies
+        run: pip install cloudscraper boto3 botocore
+          
+      - name: Run BookMyShow Deep Advance Scraper
+        env:
+          SHARD_INDEX: ${{ matrix.shard }}
+          TOTAL_SHARDS: 9
+          DEEP_ADVANCE: "true"
+        run: python src/scrapers/bms_async.py
+        
+      - name: Run Paytm Deep Advance Scraper
+        env:
+          DEEP_ADVANCE: "true"
+        run: python src/scrapers/paytm_async.py
+        
+      - name: Upload Shard Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deep-advance-shard-${{ matrix.shard }}
+          path: data/*.json
+          retention-days: 1
+
+  combine-and-backup:
+    needs: scrape-deep-advance
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Download All Shard Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: shards/
+          
+      - name: Move artifacts to data dir
+        run: |
+          mkdir -p data
+          find shards -name "*.json" -exec mv {} data/ \;
+          
+      - name: Install Dependencies
+        run: pip install boto3 botocore
+          
+      - name: Combine Deep Advance Shards
+        run: python src/combiner/aggregate.py
+        
+      - name: Backup to Backblaze B2
+        env:
+          B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
+          B2_APPLICATION_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+          B2_BUCKET_NAME: "tfiverse-backups"
+          B2_ENDPOINT: "s3.us-west-004.backblazeb2.com"
+        run: python src/db/backup_to_b2.py

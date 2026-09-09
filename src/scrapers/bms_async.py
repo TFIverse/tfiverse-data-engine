@@ -202,44 +202,61 @@ def main():
         venues = venues[start_idx:end_idx]
         print(f"🔹 Running Shard {shard_index+1}/{total_shards} - processing {len(venues)} venues.")
 
-    # Scrape LIVE (Today)
+    deep_advance = os.environ.get("DEEP_ADVANCE", "false").lower() == "true"
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30))).date()
-    live_date_code = today.strftime("%Y%m%d")
-    live_date_str = today.strftime("%Y-%m-%d")
-    
     shard_suffix = f"_{shard_index}" if total_shards > 1 else ""
     
-    print(f"📡 Fetching Live Data for {live_date_code}...")
-    live_raw = process_venues(venues, live_date_code)
-    live_parsed = parse_bms_data(live_raw, live_date_code, live_date_str)
-    
-    with open(DATA_DIR / f"latest_bms_data{shard_suffix}.json", "w") as f:
-        json.dump(live_parsed, f, indent=2)
-    print(f"✅ Saved {len(live_parsed)} live sessions.")
+    if deep_advance:
+        # ---------------------------------------------------------
+        # DEEP ADVANCE PIPELINE (Days 2 to 5)
+        # ---------------------------------------------------------
+        adv_parsed = []
+        print(f"📡 Fetching Deep Advance Data (Days 2 to 5)...")
+        
+        for day_offset in range(2, 6):
+            target_date = today + datetime.timedelta(days=day_offset)
+            adv_date_code = target_date.strftime("%Y%m%d")
+            adv_date_str = target_date.strftime("%Y-%m-%d")
+            
+            print(f"   -> Fetching Advance Data for {adv_date_code} (+{day_offset} Days)")
+            adv_raw = process_venues(venues, adv_date_code)
+            parsed_day = parse_bms_data(adv_raw, adv_date_code, adv_date_str)
+            adv_parsed.extend(parsed_day)
+        
+        with open(DATA_DIR / f"latest_bms_deep_advance_data{shard_suffix}.json", "w") as f:
+            json.dump(adv_parsed, f, indent=2)
+        print(f"✅ Saved {len(adv_parsed)} total deep advance sessions.")
 
-    # Scrape ADVANCE
-    adv_parsed = []
-    
-    # Only scrape deep advance (5 days) if requested, otherwise just Tomorrow (1 day) to avoid Cloudflare bans
-    deep_advance = os.environ.get("DEEP_ADVANCE", "false").lower() == "true"
-    max_days = 6 if deep_advance else 2
-    
-    day_label = "Deep Advance (Days 1 to 5)" if deep_advance else "Advance (Tomorrow)"
-    print(f"📡 Fetching {day_label} Data...")
-    
-    for day_offset in range(1, max_days):
-        target_date = today + datetime.timedelta(days=day_offset)
+    else:
+        # ---------------------------------------------------------
+        # HOURLY PIPELINE (Live + Tomorrow)
+        # ---------------------------------------------------------
+        live_date_code = today.strftime("%Y%m%d")
+        live_date_str = today.strftime("%Y-%m-%d")
+        
+        print(f"📡 Fetching Live Data for {live_date_code}...")
+        live_raw = process_venues(venues, live_date_code)
+        live_parsed = parse_bms_data(live_raw, live_date_code, live_date_str)
+        
+        with open(DATA_DIR / f"latest_bms_data{shard_suffix}.json", "w") as f:
+            json.dump(live_parsed, f, indent=2)
+        print(f"✅ Saved {len(live_parsed)} live sessions.")
+
+        adv_parsed = []
+        print(f"📡 Fetching Advance (Tomorrow) Data...")
+        
+        target_date = today + datetime.timedelta(days=1)
         adv_date_code = target_date.strftime("%Y%m%d")
         adv_date_str = target_date.strftime("%Y-%m-%d")
         
-        print(f"   -> Fetching Advance Data for {adv_date_code} (+{day_offset} Days)")
+        print(f"   -> Fetching Advance Data for {adv_date_code} (+1 Days)")
         adv_raw = process_venues(venues, adv_date_code)
         parsed_day = parse_bms_data(adv_raw, adv_date_code, adv_date_str)
         adv_parsed.extend(parsed_day)
-    
-    with open(DATA_DIR / f"latest_bms_advance_data{shard_suffix}.json", "w") as f:
-        json.dump(adv_parsed, f, indent=2)
-    print(f"✅ Saved {len(adv_parsed)} total advance sessions across 5 days.")
+        
+        with open(DATA_DIR / f"latest_bms_advance_data{shard_suffix}.json", "w") as f:
+            json.dump(adv_parsed, f, indent=2)
+        print(f"✅ Saved {len(adv_parsed)} advance sessions.")
 
 if __name__ == "__main__":
     main()

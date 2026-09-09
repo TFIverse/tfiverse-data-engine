@@ -8,6 +8,7 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 FILE_PATTERNS = {
     "latest_bms_data.json": "latest_bms_data_*.json",
     "latest_bms_advance_data.json": "latest_bms_advance_data_*.json",
+    "latest_bms_deep_advance_data.json": "latest_bms_deep_advance_data_*.json",
     "latest_paytm_data.json": "latest_paytm_data_*.json",
     "latest_paytm_advance_data.json": "latest_paytm_advance_data_*.json"
 }

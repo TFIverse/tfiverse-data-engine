@@ -96,49 +96,68 @@ def fetch_data(url):
 def main():
     print("🚀 Starting Sync Paytm Scraper (via districtdata2026 proxy)...")
     
+    deep_advance = os.environ.get("DEEP_ADVANCE", "false").lower() == "true"
     today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30))).date()
     
-    # Try fetching daily for today, if not try yesterday
-    live_parsed = []
-    live_date_str = ""
-    for d in [today, today - datetime.timedelta(days=1)]:
-        d_str = d.strftime("%Y-%m-%d")
-        live_url = f"https://districtdata2026.pages.dev/boxoffice/{d_str}_Detailed.json"
-        print(f"📡 Trying Live Data from {live_url}...")
-        live_data = fetch_data(live_url)
-        if live_data:
-            live_parsed = decompress_and_parse(live_data, d_str)
-            live_date_str = d_str
-            break
+    if deep_advance:
+        # ---------------------------------------------------------
+        # DEEP ADVANCE PIPELINE (Days 2 to 5)
+        # ---------------------------------------------------------
+        adv_parsed = []
+        print(f"📡 Fetching Deep Advance Data (Days 2 to 5)...")
+        
+        for day_offset in range(2, 6):
+            d = today + datetime.timedelta(days=day_offset)
+            d_str = d.strftime("%Y-%m-%d")
+            adv_url = f"https://districtdata2026.pages.dev/advance/{d_str}_Detailed.json"
+            print(f"   -> Trying Advance Data from {adv_url} (+{day_offset} Days)...")
+            adv_data = fetch_data(adv_url)
+            if adv_data:
+                parsed_day = decompress_and_parse(adv_data, d_str)
+                adv_parsed.extend(parsed_day)
 
-    if live_parsed:
-        with open(DATA_DIR / "latest_paytm_data.json", "w") as f:
-            json.dump(live_parsed, f, indent=2)
-        print(f"✅ Saved {len(live_parsed)} live sessions for {live_date_str}.")
-    
-    # Fetch ADVANCE
-    adv_parsed = []
-    
-    deep_advance = os.environ.get("DEEP_ADVANCE", "false").lower() == "true"
-    max_days = 6 if deep_advance else 2
-    
-    day_label = "Deep Advance (Days 1 to 5)" if deep_advance else "Advance (Tomorrow)"
-    print(f"📡 Fetching {day_label} Data...")
-    
-    for day_offset in range(1, max_days):
-        d = today + datetime.timedelta(days=day_offset)
-        d_str = d.strftime("%Y-%m-%d")
-        adv_url = f"https://districtdata2026.pages.dev/advance/{d_str}_Detailed.json"
-        print(f"   -> Trying Advance Data from {adv_url} (+{day_offset} Days)...")
-        adv_data = fetch_data(adv_url)
-        if adv_data:
-            parsed_day = decompress_and_parse(adv_data, d_str)
-            adv_parsed.extend(parsed_day)
+        if adv_parsed:
+            with open(DATA_DIR / "latest_paytm_deep_advance_data.json", "w") as f:
+                json.dump(adv_parsed, f, indent=2)
+            print(f"✅ Saved {len(adv_parsed)} total deep advance sessions.")
 
-    if adv_parsed:
-        with open(DATA_DIR / "latest_paytm_advance_data.json", "w") as f:
-            json.dump(adv_parsed, f, indent=2)
-        print(f"✅ Saved {len(adv_parsed)} total advance sessions across 5 days.")
+    else:
+        # ---------------------------------------------------------
+        # HOURLY PIPELINE (Live + Tomorrow)
+        # ---------------------------------------------------------
+        live_parsed = []
+        live_date_str = ""
+        for d in [today, today - datetime.timedelta(days=1)]:
+            d_str = d.strftime("%Y-%m-%d")
+            live_url = f"https://districtdata2026.pages.dev/boxoffice/{d_str}_Detailed.json"
+            print(f"📡 Trying Live Data from {live_url}...")
+            live_data = fetch_data(live_url)
+            if live_data:
+                live_parsed = decompress_and_parse(live_data, d_str)
+                live_date_str = d_str
+                break
+
+        if live_parsed:
+            with open(DATA_DIR / "latest_paytm_data.json", "w") as f:
+                json.dump(live_parsed, f, indent=2)
+            print(f"✅ Saved {len(live_parsed)} live sessions for {live_date_str}.")
+        
+        adv_parsed = []
+        adv_date_str = ""
+        for d in [today + datetime.timedelta(days=1), today]:
+            d_str = d.strftime("%Y-%m-%d")
+            adv_url = f"https://districtdata2026.pages.dev/advance/{d_str}_Detailed.json"
+            print(f"📡 Trying Advance Data (Tomorrow) from {adv_url}...")
+            adv_data = fetch_data(adv_url)
+            if adv_data:
+                adv_parsed = decompress_and_parse(adv_data, d_str)
+                adv_date_str = d_str
+                break
+
+        if adv_parsed:
+            with open(DATA_DIR / "latest_paytm_advance_data.json", "w") as f:
+                json.dump(adv_parsed, f, indent=2)
+            print(f"✅ Saved {len(adv_parsed)} advance sessions for {adv_date_str}.")
 
 if __name__ == "__main__":
     main()
