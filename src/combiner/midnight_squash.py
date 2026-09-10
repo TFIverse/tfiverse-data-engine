@@ -51,7 +51,9 @@ def main():
         "bms_live": {},
         "paytm_live": {},
         "bms_advance": {},
-        "paytm_advance": {}
+        "paytm_advance": {},
+        "bms_deep_advance": {},
+        "paytm_deep_advance": {}
     }
     
     # We sort keys to process them in chronological order

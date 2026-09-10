@@ -34,11 +34,6 @@ jobs:
           DEEP_ADVANCE: "true"
         run: python src/scrapers/bms_async.py
         
-      - name: Run Paytm Deep Advance Scraper
-        env:
-          DEEP_ADVANCE: "true"
-        run: python src/scrapers/paytm_async.py
-        
       - name: Upload Shard Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -70,10 +65,16 @@ jobs:
           find shards -name "*.json" -exec mv {} data/ \;
           
       - name: Install Dependencies
-        run: pip install boto3 botocore
+        run: pip install boto3 botocore cloudscraper
           
       - name: Combine Deep Advance Shards
         run: python src/combiner/aggregate.py
+
+      # Paytm doesn't shard — runs once here instead of 9x in the matrix job
+      - name: Run Paytm Deep Advance Scraper
+        env:
+          DEEP_ADVANCE: "true"
+        run: python src/scrapers/paytm_async.py
         
       - name: Backup to Backblaze B2
         env:
@@ -82,3 +83,4 @@ jobs:
           B2_BUCKET_NAME: "tfiverse-backups"
           B2_ENDPOINT: "s3.us-west-004.backblazeb2.com"
         run: python src/db/backup_to_b2.py
+
