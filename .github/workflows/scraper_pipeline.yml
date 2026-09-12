@@ -5,6 +5,10 @@ on:
     - cron: '0 * * * *' # Every 1 hour (24 times a day)
   workflow_dispatch: # Allows manual trigger
 
+concurrency:
+  group: scraper-pipeline
+  cancel-in-progress: true
+
 jobs:
   discover-venues:
     runs-on: ubuntu-latest
@@ -59,12 +63,6 @@ jobs:
           TOTAL_SHARDS: 9
         run: python src/scrapers/bms_async.py
 
-      - name: Run Paytm Scraper Shard (Live + Advance)
-        env:
-          SHARD_INDEX: ${{ matrix.shard }}
-          TOTAL_SHARDS: 9
-        run: python src/scrapers/paytm_async.py
-
       - name: Upload Shard Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -96,6 +94,9 @@ jobs:
       - name: Install Python Dependencies
         run: |
           pip install cloudscraper aiohttp nest_asyncio boto3
+
+      - name: Run Paytm Scraper (Live + Advance)
+        run: python src/scrapers/paytm_async.py
 
       - name: Combine Shards
         run: python src/combiner/aggregate.py

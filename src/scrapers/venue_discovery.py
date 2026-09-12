@@ -75,19 +75,28 @@ def main():
     # 2. Get list of all cities from BookMyShow
     print("🗺️ Fetching master list of all regions...")
     scraper = get_scraper()
-    res = scraper.get("https://in.bookmyshow.com/api/explore/v1/regions")
+    res = scraper.get("https://in.bookmyshow.com/serv/getData?cmd=GETREGIONS")
     
     if res.status_code != 200:
         print("❌ Failed to fetch regions API")
         return
         
-    regions_data = res.json()
     cities = []
-    for region in regions_data.get("data", []):
-        cities.append(region.get("name"))
+    try:
+        text = res.text
+        # The endpoint returns raw JS: var regionlst={...};var subRegionData=...
+        json_str = text.split("var regionlst=")[1].split(";var ")[0]
+        data = json.loads(json_str)
         
-    for state in regions_data.get("popularData", []):
-        cities.append(state.get("name"))
+        for k, v in data.items():
+            if isinstance(v, list):
+                for item in v:
+                    city_name = item.get("name")
+                    if city_name:
+                        cities.append(city_name)
+    except Exception as e:
+        print("❌ Failed to parse regions:", e)
+        return
         
     # Deduplicate city list
     cities = list(set([c.lower().replace(" ", "-") for c in cities if c]))

@@ -31,40 +31,38 @@ def get_scraper():
     })
     return scraper
 
-def process_venues(venues, date_code, retries=3):
-    results = []
+def fetch_single_venue(venue, date_code, retries=3):
+    venue_code = venue.get("VenueCode")
+    if not venue_code:
+        return None
+        
     scraper = get_scraper()
+    url = f"https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode={venue_code}&dateCode={date_code}"
     
-    for i, venue in enumerate(venues):
-        venue_code = venue.get("VenueCode")
-        if not venue_code:
-            continue
-            
-        # Identity Rotation: Reset fake IP and User-Agent every 10 requests
-        if i > 0 and i % 10 == 0:
-            scraper = get_scraper()
-            
-        url = f"https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode={venue_code}&dateCode={date_code}"
-        
-        for attempt in range(retries):
-            try:
-                response = scraper.get(url, timeout=10)
-                if response.status_code == 200:
-                    # Ensure it's valid JSON, not a Cloudflare HTML page
-                    if not response.text.strip().startswith("{"):
-                        raise RuntimeError(f"Blocked by Cloudflare on {venue_code}")
-                    results.append({"venueCode": venue_code, "data": response.json()})
-                    break
-                elif response.status_code in [403, 429]:
-                    scraper = get_scraper()
-                    time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
-            except Exception as e:
-                if attempt == retries - 1:
-                    print(f"Error fetching {venue_code}: {e}")
-        
-        # Avoid rate limits by sleeping
-        time.sleep(random.uniform(0.35, 0.7))
-        
+    for attempt in range(retries):
+        try:
+            response = scraper.get(url, timeout=10)
+            if response.status_code == 200:
+                if not response.text.strip().startswith("{"):
+                    raise RuntimeError(f"Blocked by Cloudflare on {venue_code}")
+                return {"venueCode": venue_code, "data": response.json()}
+            elif response.status_code in [403, 429]:
+                scraper = get_scraper()
+                time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
+        except Exception as e:
+            if attempt == retries - 1:
+                pass
+        time.sleep(random.uniform(0.2, 0.5))
+    return None
+
+def process_venues(venues, date_code, retries=3, max_workers=6):
+    results = []
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(fetch_single_venue, v, date_code, retries): v for v in venues}
+        for future in as_completed(futures):
+            res = future.result()
+            if res:
+                results.append(res)
     return results
 
 def parse_bms_data(raw_results, date_code, target_date_str):
