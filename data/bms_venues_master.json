@@ -18538,5 +18538,270 @@
     "VenueCode": "PPMJ",
     "VenueName": "Pari Palace: Mau",
     "RegionCode": "MAAU"
+  },
+  {
+    "VenueCode": "CVMU",
+    "VenueName": "Cineverse Multiplex: Uppal",
+    "RegionCode": "MDCH"
+  },
+  {
+    "VenueCode": "APNS",
+    "VenueName": "Aparna Cinemas: Shamshabad",
+    "RegionCode": "MDCH"
+  },
+  {
+    "VenueCode": "MCKT",
+    "VenueName": "Mahalaxmi Complex: Kothapet",
+    "RegionCode": "MDCH"
+  },
+  {
+    "VenueCode": "KTKT",
+    "VenueName": "Kumar Theatre: Kachiguda",
+    "RegionCode": "MDCH"
+  },
+  {
+    "VenueCode": "GXKM",
+    "VenueName": "The Galaxy Cinemas Karpagam Theatre A/C: Mettur",
+    "RegionCode": "METZ"
+  },
+  {
+    "VenueCode": "SBHD",
+    "VenueName": "Sri Veera Bhadra Theater: Ambajipeta",
+    "RegionCode": "AMBJ"
+  },
+  {
+    "VenueCode": "SPDM",
+    "VenueName": "Sri Padmaja Theatre: Tadepalligudem",
+    "RegionCode": "TANK"
+  },
+  {
+    "VenueCode": "BCSL",
+    "VenueName": "Bharath Cinemas: Sullia",
+    "RegionCode": "SLIA"
+  },
+  {
+    "VenueCode": "KBPK",
+    "VenueName": "KB Cinema: Rani Pokhari",
+    "RegionCode": "RNPK"
+  },
+  {
+    "VenueCode": "INSS",
+    "VenueName": "Sri Satyanarayana Theatre: Gurazala",
+    "RegionCode": "GURZ"
+  },
+  {
+    "VenueCode": "AKCG",
+    "VenueName": "AK Cinemas: Gharghoda",
+    "RegionCode": "GHAG"
+  },
+  {
+    "VenueCode": "CKDM",
+    "VenueName": "Chhotu Maharaj: Karad, MH",
+    "RegionCode": "KARD"
+  },
+  {
+    "VenueCode": "GWCR",
+    "VenueName": "Gowtham Cinemas A/c 4K Dolby Atmos: Rayachoti",
+    "RegionCode": "RYCT"
+  },
+  {
+    "VenueCode": "PTRY",
+    "VenueName": "Prasad Theater: Rayachoti",
+    "RegionCode": "RYCT"
+  },
+  {
+    "VenueCode": "ZKCV",
+    "VenueName": "ZK Cineverse (Only Recliner & Sofa): Pusad",
+    "RegionCode": "PUSD"
+  },
+  {
+    "VenueCode": "SMEM",
+    "VenueName": "SS3 Cinemas, Memari: Burdwan",
+    "RegionCode": "MMRR"
+  },
+  {
+    "VenueCode": "CTCN",
+    "VenueName": "Citishine Cinemas: Gohana",
+    "RegionCode": "GOHA"
+  },
+  {
+    "VenueCode": "MDCA",
+    "VenueName": "Sanelite Cinemas (Modern Cineplex): Anjar",
+    "RegionCode": "ANJR"
+  },
+  {
+    "VenueCode": "SDHP",
+    "VenueName": "Shree Ram Talkies: Sidhpura",
+    "RegionCode": "SDPR"
+  },
+  {
+    "VenueCode": "RTHT",
+    "VenueName": "Sri Raghavendra Cinemas: Hoskote",
+    "RegionCode": "HOKT"
+  },
+  {
+    "VenueCode": "ATAM",
+    "VenueName": "Alagesan Theatre: Ayyampalayam",
+    "RegionCode": "BTGD"
+  },
+  {
+    "VenueCode": "JAYA",
+    "VenueName": "JAYA CINE VIBES AC Dolby7.1 Sound Laser Projector",
+    "RegionCode": "PRKM"
+  },
+  {
+    "VenueCode": "RJCD",
+    "VenueName": "Raj Cinema: Dhanera",
+    "RegionCode": "DHAC"
+  },
+  {
+    "VenueCode": "CMKV",
+    "VenueName": "Chhotu Maharaj: Kavathe Mahankal (Sangli)",
+    "RegionCode": "SANG"
+  },
+  {
+    "VenueCode": "SLHI",
+    "VenueName": "Lakshmi Talkies A/C 2K Dolby 9.1 Digital: Hindupur",
+    "RegionCode": "HNDP"
+  },
+  {
+    "VenueCode": "SVMX",
+    "VenueName": "SV Cinemax: Hindupur",
+    "RegionCode": "HNDP"
+  },
+  {
+    "VenueCode": "GCJR",
+    "VenueName": "Gravity Cinemax: Jaijaipur",
+    "RegionCode": "JAIJ"
+  },
+  {
+    "VenueCode": "RFYU",
+    "VenueName": "Radha Cinema: Randheja",
+    "RegionCode": "GNAGAR"
+  },
+  {
+    "VenueCode": "CBOB",
+    "VenueName": "CBO Gift City Club: Gandhinagar",
+    "RegionCode": "GNAGAR"
+  },
+  {
+    "VenueCode": "PAJA",
+    "VenueName": "PVR: Anjana Mall, Agra",
+    "RegionCode": "AGRA"
+  },
+  {
+    "VenueCode": "CCPF",
+    "VenueName": "Cineworld Multiplex: Paras Pearls Mall, Agra",
+    "RegionCode": "AGRA"
+  },
+  {
+    "VenueCode": "CMSN",
+    "VenueName": "Chhotu Maharaj: Sikandra Agra, UP",
+    "RegionCode": "AGRA"
+  },
+  {
+    "VenueCode": "CJSR",
+    "VenueName": "Chhotu Maharaj:Dharmashri Road,Balaji Mandir,Sagar",
+    "RegionCode": "SAMP"
+  },
+  {
+    "VenueCode": "CTBP",
+    "VenueName": "Chhotu Maharaj: Bhapel (Sagar), Madhya Pradesh",
+    "RegionCode": "SAMP"
+  },
+  {
+    "VenueCode": "SRNI",
+    "VenueName": "Srinivasa Theatre: Godavarikhani",
+    "RegionCode": "GDVK"
+  },
+  {
+    "VenueCode": "PJDC",
+    "VenueName": "Paradise JD Cineprime: Porbandar",
+    "RegionCode": "PORB"
+  },
+  {
+    "VenueCode": "PCBB",
+    "VenueName": "Punit Movie Max (AC): Biaora",
+    "RegionCode": "BIAR"
+  },
+  {
+    "VenueCode": "CMBD",
+    "VenueName": "Chhotu Maharaj: Banda, UP",
+    "RegionCode": "BADZ"
+  },
+  {
+    "VenueCode": "ACMA",
+    "VenueName": "Apple Cinema: Anand",
+    "RegionCode": "AND"
+  },
+  {
+    "VenueCode": "MLDP",
+    "VenueName": "Microcineplex Cinema: Dehradun",
+    "RegionCode": "DEH"
+  },
+  {
+    "VenueCode": "SSMV",
+    "VenueName": "SRI SHANMUGAM THEATRE (RG CINEMAS)4K DOLBY ATMOS",
+    "RegionCode": "VAIT"
+  },
+  {
+    "VenueCode": "RDRM",
+    "VenueName": "RadhaRam Talkies: Basmat",
+    "RegionCode": "ASTB"
+  },
+  {
+    "VenueCode": "CLCS",
+    "VenueName": "CONNPLEX Luxuriance Cinemas: Solapur",
+    "RegionCode": "SOLA"
+  },
+  {
+    "VenueCode": "ACMS",
+    "VenueName": "Asha Cinemark: Solapur (Newly Opened)",
+    "RegionCode": "SOLA"
+  },
+  {
+    "VenueCode": "YSDK",
+    "VenueName": "Yuvaraj Screens Dolby Atmos: Kovvur",
+    "RegionCode": "KOVU"
+  },
+  {
+    "VenueCode": "BJJC",
+    "VenueName": "Balaji Cineplex: Jetpur",
+    "RegionCode": "JETP"
+  },
+  {
+    "VenueCode": "KMAP",
+    "VenueName": "PVR: Mall 11, Jabalpur",
+    "RegionCode": "JABL"
+  },
+  {
+    "VenueCode": "CJJB",
+    "VenueName": "Chhotu Maharaj Cine Cafe: Jabalpur, MP",
+    "RegionCode": "JABL"
+  },
+  {
+    "VenueCode": "KATM",
+    "VenueName": "Krishna Talkies: Mainpuri",
+    "RegionCode": "MAIN"
+  },
+  {
+    "VenueCode": "SNCJ",
+    "VenueName": "Sanmax Cinemas: Ballia",
+    "RegionCode": "ALBI"
+  },
+  {
+    "VenueCode": "PYCY",
+    "VenueName": "Pratik Citymall Cinema: Pamgarh",
+    "RegionCode": "PAGH"
+  },
+  {
+    "VenueCode": "SBGN",
+    "VenueName": "SBG Theatre: Hassan",
+    "RegionCode": "HASN"
+  },
+  {
+    "VenueCode": "PRTS",
+    "VenueName": "Pruthvi Theatre: Hassan",
+    "RegionCode": "HASN"
   }
 ]
