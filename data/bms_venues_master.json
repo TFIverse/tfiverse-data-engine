@@ -18803,5 +18803,95 @@
     "VenueCode": "PRTS",
     "VenueName": "Pruthvi Theatre: Hassan",
     "RegionCode": "HASN"
+  },
+  {
+    "VenueCode": "BCTP",
+    "VenueName": "Broadway Cinemas: Tirupur",
+    "RegionCode": "TIRP"
+  },
+  {
+    "VenueCode": "BHKU",
+    "VenueName": "Bharath Theatre A/C: Mydukur",
+    "RegionCode": "MYDU"
+  },
+  {
+    "VenueCode": "MMMZ",
+    "VenueName": "Milan Theatre: Chickmagaluru",
+    "RegionCode": "CHKA"
+  },
+  {
+    "VenueCode": "VVGT",
+    "VenueName": "Vels Theatres: Chennai",
+    "RegionCode": "CHEN"
+  },
+  {
+    "VenueCode": "MMPR",
+    "VenueName": "MovieMax: PR Mall, Wall Tax Road, Chennai",
+    "RegionCode": "CHEN"
+  },
+  {
+    "VenueCode": "AMNH",
+    "VenueName": "INOX: Arcadia, Brigade Utopia, Bengaluru",
+    "RegionCode": "BANG"
+  },
+  {
+    "VenueCode": "PTSS",
+    "VenueName": "PictureTime Sachhiyay Silver Screen: Nagaur",
+    "RegionCode": "NAGR"
+  },
+  {
+    "VenueCode": "TVKK",
+    "VenueName": "Thavoos Theatre: Kunnamkulam",
+    "RegionCode": "THSR"
+  },
+  {
+    "VenueCode": "ASJA",
+    "VenueName": "Srinivasa Theatre: Velangi",
+    "RegionCode": "VELG"
+  },
+  {
+    "VenueCode": "ABCR",
+    "VenueName": "ABR Cinemas Neo Screen X:  Kanuru, Vijayawada",
+    "RegionCode": "VIJA"
+  },
+  {
+    "VenueCode": "VCSV",
+    "VenueName": "Capital Cinemas (Victory Screen): Vijayawada",
+    "RegionCode": "VIJA"
+  },
+  {
+    "VenueCode": "VATB",
+    "VenueName": "Veerbhadreshwara Theatre: Bhadravati",
+    "RegionCode": "BDVT"
+  },
+  {
+    "VenueCode": "PJMJ",
+    "VenueName": "PJ Movies (Tarini Talkies): Joda",
+    "RegionCode": "JODA"
+  },
+  {
+    "VenueCode": "CDRT",
+    "VenueName": "SRI LAKSHMI AC 2K LASER DOLBY ATMOS: DHARMAJIGUDEM",
+    "RegionCode": "DXCF"
+  },
+  {
+    "VenueCode": "EVAA",
+    "VenueName": "Evaan Cinemas: Duliajan",
+    "RegionCode": "DIJN"
+  },
+  {
+    "VenueCode": "SLTK",
+    "VenueName": "Sri Lakshmi Theater A/c DTS: Kotananduru",
+    "RegionCode": "KTND"
+  },
+  {
+    "VenueCode": "CMJA",
+    "VenueName": "Chhotu Maharaj: TEOK, Jorhat (Assam)",
+    "RegionCode": "JORT"
+  },
+  {
+    "VenueCode": "SRAL",
+    "VenueName": "Srinivasa Theatre: Peddapalli",
+    "RegionCode": "PEDA"
   }
 ]
