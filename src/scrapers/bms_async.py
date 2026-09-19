@@ -22,6 +22,16 @@ def get_scraper():
     scraper = cloudscraper.create_scraper(
         browser={"browser": "chrome", "platform": "windows", "desktop": True}
     )
+    
+    proxy_env = os.environ.get("PROXY_LIST", "")
+    if proxy_env:
+        proxies_list = proxy_env.split(",")
+        chosen_proxy = random.choice(proxies_list)
+        scraper.proxies = {
+            "http": chosen_proxy,
+            "https": chosen_proxy
+        }
+        
     scraper.headers.update({
         "User-Agent": random.choice(USER_AGENTS),
         "Accept": "application/json, text/plain, */*",
@@ -180,6 +190,46 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                         
     return final_sessions
 
+def run_dynamic_venue_discovery(scraper, date_code, known_venues):
+    # Dynamic Discovery: Queries v4 primary-dynamic to discover any brand new venues
+    event_codes_env = os.environ.get("HOT_EVENT_CODES", "")
+    regions = ["hyderabad", "vijayawada", "vizag", "bengaluru", "chennai"]
+    
+    if not event_codes_env:
+        return known_venues
+        
+    hot_events = event_codes_env.split(",")
+    known_codes = {v.get("VenueCode") for v in known_venues if v.get("VenueCode")}
+    discovered = []
+    
+    for region in regions:
+        for event in hot_events:
+            url = f"https://in.bookmyshow.com/api/v4/movies-data/showtimes-by-event/primary-dynamic?eventCode={event}&regionSlug={region}&dateCode={date_code}"
+            try:
+                res = scraper.get(url, timeout=10)
+                if res.status_code == 200:
+                    data = res.json()
+                    venues = data.get("ShowDetails", [{}])[0].get("Venues", [])
+                    for v in venues:
+                        vcode = v.get("VenueCode")
+                        if vcode and vcode not in known_codes:
+                            print(f"🌟 DISCOVERED NEW VENUE: {v.get('VenueName')} ({vcode}) in {region}")
+                            new_venue = {
+                                "VenueCode": vcode,
+                                "VenueName": v.get("VenueName"),
+                                "City": region.capitalize(),
+                            }
+                            discovered.append(new_venue)
+                            known_codes.add(vcode)
+            except Exception as e:
+                pass
+            time.sleep(0.5)
+            
+    if discovered:
+        print(f"🎉 Dynamic Discovery found {len(discovered)} brand new venues! Appending to scrape list.")
+        known_venues.extend(discovered)
+    return known_venues
+
 def main():
     print("🚀 Starting Sync BMS Scraper with Cloudscraper bypass...")
     if not VENUES_FILE.exists():
@@ -188,6 +238,13 @@ def main():
 
     with open(VENUES_FILE, "r") as f:
         venues = json.load(f)
+        
+    scraper_instance = get_scraper()
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30))).date()
+    live_date_code = today.strftime("%Y%m%d")
+    
+    # Inject Dynamic Venue Discovery
+    venues = run_dynamic_venue_discovery(scraper_instance, live_date_code, venues)
 
     # Sharding Logic
     shard_index = int(os.environ.get("SHARD_INDEX", 0))
@@ -201,7 +258,6 @@ def main():
         print(f"🔹 Running Shard {shard_index+1}/{total_shards} - processing {len(venues)} venues.")
 
     deep_advance = os.environ.get("DEEP_ADVANCE", "false").lower() == "true"
-    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=5, minutes=30))).date()
     shard_suffix = f"_{shard_index}" if total_shards > 1 else ""
     
     if deep_advance:
