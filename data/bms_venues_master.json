@@ -18893,5 +18893,105 @@
     "VenueCode": "SRAL",
     "VenueName": "Srinivasa Theatre: Peddapalli",
     "RegionCode": "PEDA"
+  },
+  {
+    "VenueCode": "SDRJ",
+    "VenueName": "Sri Trinadh & Ramnadh Complex A/C: Devarapalli",
+    "RegionCode": "DVRP"
+  },
+  {
+    "VenueCode": "RCSH",
+    "VenueName": "Raj Multiplex: Nashirabad",
+    "RegionCode": "JALG"
+  },
+  {
+    "VenueCode": "CNJD",
+    "VenueName": "CONNPLEX Signature Cinemas: Jamshedpur",
+    "RegionCode": "JMDP"
+  },
+  {
+    "VenueCode": "CUMF",
+    "VenueName": "Chhotu Maharaj: Fatehpur",
+    "RegionCode": "FATE"
+  },
+  {
+    "VenueCode": "GCVF",
+    "VenueName": "Govind Cineplex: Paratwada",
+    "RegionCode": "PARA"
+  },
+  {
+    "VenueCode": "CCUN",
+    "VenueName": "Citara Cinemas: Nadaun",
+    "RegionCode": "DNUA"
+  },
+  {
+    "VenueCode": "AVCB",
+    "VenueName": "Avatansa Cinemas 2K Laser 7.1: Bihar",
+    "RegionCode": "BIHS"
+  },
+  {
+    "VenueCode": "CMBS",
+    "VenueName": "Chhotu Maharaj Cine Cafe: Bihar Sharif",
+    "RegionCode": "BIHS"
+  },
+  {
+    "VenueCode": "LKPR",
+    "VenueName": "Lakshmi Priya Theater: Vinjamur",
+    "RegionCode": "VJMR"
+  },
+  {
+    "VenueCode": "SIKL",
+    "VenueName": "Simran Cineplex: Tirwaganj",
+    "RegionCode": "TIRW"
+  },
+  {
+    "VenueCode": "VATD",
+    "VenueName": "Vasantha 4K RGB LASER DOLBY ATMOS: Davangere",
+    "RegionCode": "DAVA"
+  },
+  {
+    "VenueCode": "BCKA",
+    "VenueName": "Bharath Cinemas: Karkala",
+    "RegionCode": "KARK"
+  },
+  {
+    "VenueCode": "CBWC",
+    "VenueName": "CONNPLEX Smart Cinemas: Biswanath Chariali",
+    "RegionCode": "BICH"
+  },
+  {
+    "VenueCode": "KAGY",
+    "VenueName": "Kamala Theater: Jaggayyapeta",
+    "RegionCode": "JGGY"
+  },
+  {
+    "VenueCode": "CMRM",
+    "VenueName": "Chhotu Maharaj: Rewa,MP",
+    "RegionCode": "RWAA"
+  },
+  {
+    "VenueCode": "VEDS",
+    "VenueName": "VENKATESWARA THEATRE DTS: Solasiramani",
+    "RegionCode": "NMKL"
+  },
+  {
+    "VenueCode": "BKTL",
+    "VenueName": "Bhaskar Theater: Cherukupalli",
+    "RegionCode": "EHRK"
+  },
+  {
+    "VenueCode": "RVCR",
+    "VenueName": "Kalyan Talkies KBP: Rupnagar",
+    "RegionCode": "RUPN"
+  },
+  {
+    "VenueCode": "MTEG",
+    "VenueName": "Mahalakshmi Theatre: Gadag",
+    "RegionCode": "GADG"
+  },
+  {
+    "VenueCode": "ATCI",
+    "VenueName": "Adarsha Theatre: Chintamani",
+    "RegionCode": "CHTI"
   }
 ]
