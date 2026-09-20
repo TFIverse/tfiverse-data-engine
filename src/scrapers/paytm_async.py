@@ -66,6 +66,7 @@ def decompress_and_parse(data, date_str):
             state = rev["states"].get(state_id, "Unknown")
             venue = rev["venues"].get(venue_id_num, "Unknown")
             time_str = rev["showtimes"].get(time_id, "")
+            audi_name = rev["audis"].get(audi_id, f"AUDI_{audi_id}")
             
             final_sessions.append({
                 "movie": movie_key,
@@ -79,7 +80,9 @@ def decompress_and_parse(data, date_str):
                 "grossRevenue": gross,
                 "source": "PAYTM",
                 "venueId": venue_id,
-                "showId": f"PAYTM_{venue_id}_{time_str.replace(' ', '')}"
+                "audiId": str(audi_id),
+                "screen": str(audi_name),
+                "showId": f"PAYTM_{venue_id}_AUDI_{audi_id}_{time_str.replace(' ', '')}"
             })
             
     return final_sessions
