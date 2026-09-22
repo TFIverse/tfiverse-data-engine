@@ -19043,5 +19043,40 @@
     "VenueCode": "RSMO",
     "VenueName": "R S Movie: Bhanjanagar",
     "RegionCode": "BHAJ"
+  },
+  {
+    "VenueCode": "SVVK",
+    "VenueName": "Sri Vijaya Lakshmi Cinemax Dolby Atmos",
+    "RegionCode": "KOMG"
+  },
+  {
+    "VenueCode": "WDNS",
+    "VenueName": "Woodland Cineplex: Siddapura, Karnataka",
+    "RegionCode": "SDDU"
+  },
+  {
+    "VenueCode": "SLKK",
+    "VenueName": "Sri Lakshmi Talkies: Kalla",
+    "RegionCode": "KLLL"
+  },
+  {
+    "VenueCode": "APTA",
+    "VenueName": "Apsara Theatre A/C Dolby 7.1: Tangutur",
+    "RegionCode": "TANG"
+  },
+  {
+    "VenueCode": "SRCE",
+    "VenueName": "Star Cineplex Screen 1: Kuchaman",
+    "RegionCode": "KHCY"
+  },
+  {
+    "VenueCode": "SCJL",
+    "VenueName": "Shanthala Cinema Laser Dolby ATMOS A/C: Madhugiri",
+    "RegionCode": "MADH"
+  },
+  {
+    "VenueCode": "CKMK",
+    "VenueName": "Cinepolis: Kessel Mall, Kurukshetra",
+    "RegionCode": "KURU"
   }
 ]
