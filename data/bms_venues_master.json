@@ -18993,5 +18993,55 @@
     "VenueCode": "ATCI",
     "VenueName": "Adarsha Theatre: Chintamani",
     "RegionCode": "CHTI"
+  },
+  {
+    "VenueCode": "AKSR",
+    "VenueName": "Akshara Cinemas Dolby Atmos: Ravulapalem",
+    "RegionCode": "RVPL"
+  },
+  {
+    "VenueCode": "SPPC",
+    "VenueName": "Sai Picture Palace: Rayachoti",
+    "RegionCode": "RYCT"
+  },
+  {
+    "VenueCode": "SKBT",
+    "VenueName": "Shri Shakti Theatre: Ranebennur",
+    "RegionCode": "RANE"
+  },
+  {
+    "VenueCode": "SKTS",
+    "VenueName": "Shiv Shakti Theatre: Ranebennur",
+    "RegionCode": "RANE"
+  },
+  {
+    "VenueCode": "RTFF",
+    "VenueName": "Royal Multi Cinema: Kawardha",
+    "RegionCode": "KAWA"
+  },
+  {
+    "VenueCode": "EKSE",
+    "VenueName": "EOS Kawardha Swara Entertainment: Kawardha",
+    "RegionCode": "KAWA"
+  },
+  {
+    "VenueCode": "CYAB",
+    "VenueName": "City Cinema: Abohar",
+    "RegionCode": "ABOR"
+  },
+  {
+    "VenueCode": "GNNJ",
+    "VenueName": "Gajanan Multiplex: Paddhari",
+    "RegionCode": "RAJK"
+  },
+  {
+    "VenueCode": "RTSR",
+    "VenueName": "Raj Talkies: Raipur",
+    "RegionCode": "RAIPUR"
+  },
+  {
+    "VenueCode": "RSMO",
+    "VenueName": "R S Movie: Bhanjanagar",
+    "RegionCode": "BHAJ"
   }
 ]
