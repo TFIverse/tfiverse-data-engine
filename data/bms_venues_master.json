@@ -19078,5 +19078,45 @@
     "VenueCode": "CKMK",
     "VenueName": "Cinepolis: Kessel Mall, Kurukshetra",
     "RegionCode": "KURU"
+  },
+  {
+    "VenueCode": "PAYT",
+    "VenueName": "Priya Talkies: Amravati",
+    "RegionCode": "AMRA"
+  },
+  {
+    "VenueCode": "VCMX",
+    "VenueName": "Sri Krishna Cinemax: Mandapeta",
+    "RegionCode": "MAND"
+  },
+  {
+    "VenueCode": "SBHM",
+    "VenueName": "T3 Cinemas: Sribhumi",
+    "RegionCode": "KRNJ"
+  },
+  {
+    "VenueCode": "DRCN",
+    "VenueName": "DRC Cinema: Kushalnagar",
+    "RegionCode": "KUSA"
+  },
+  {
+    "VenueCode": "SCJM",
+    "VenueName": "SVF Cinemas: Junction Mall, Durgapur",
+    "RegionCode": "DURGA"
+  },
+  {
+    "VenueCode": "ONEA",
+    "VenueName": "1 Cinemas: Akola, Maharashtra",
+    "RegionCode": "AKOL"
+  },
+  {
+    "VenueCode": "SLCA",
+    "VenueName": "Silver Cineplex: Pathsala",
+    "RegionCode": "PATS"
+  },
+  {
+    "VenueCode": "AJCI",
+    "VenueName": "Anjani Theatre: Chintamani",
+    "RegionCode": "CHTI"
   }
 ]
