@@ -19118,5 +19118,50 @@
     "VenueCode": "AJCI",
     "VenueName": "Anjani Theatre: Chintamani",
     "RegionCode": "CHTI"
+  },
+  {
+    "VenueCode": "KTJG",
+    "VenueName": "Krishnaveni Theatre: Jaggampeta",
+    "RegionCode": "JAGG"
+  },
+  {
+    "VenueCode": "SYKA",
+    "VenueName": "Satyanarayana Kalamandir: Addanki",
+    "RegionCode": "ADKI"
+  },
+  {
+    "VenueCode": "STGM",
+    "VenueName": "Sanelite Cinemas: Treg Mall, Patan",
+    "RegionCode": "PATA"
+  },
+  {
+    "VenueCode": "JPDD",
+    "VenueName": "JP DD Cinema: Satna",
+    "RegionCode": "SATN"
+  },
+  {
+    "VenueCode": "PCBV",
+    "VenueName": "Pari Cineplex: Babatpur, Varanasi",
+    "RegionCode": "VAR"
+  },
+  {
+    "VenueCode": "SIPA",
+    "VenueName": "IP Sigra Mall: 7D Cinema, Varanasi",
+    "RegionCode": "VAR"
+  },
+  {
+    "VenueCode": "SHTW",
+    "VenueName": "Sharada Theatre: Kolar",
+    "RegionCode": "OLAR"
+  },
+  {
+    "VenueCode": "SBTO",
+    "VenueName": "Sri Vinayaka Talkies  Dolby Atmos  A/C Screen 2",
+    "RegionCode": "OLAR"
+  },
+  {
+    "VenueCode": "BCBD",
+    "VenueName": "Bharath Chitramandira: Devadurga",
+    "RegionCode": "DEVD"
   }
 ]
