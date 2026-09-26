@@ -45,6 +45,7 @@ def fetch_single_venue(venue, date_code, retries=3):
     venue_code = venue.get("VenueCode")
     if not venue_code:
         return None
+    region_code = str(venue.get("RegionCode") or venue.get("City") or "").strip()
         
     scraper = get_scraper()
     url = f"https://in.bookmyshow.com/api/v2/mobile/showtimes/byvenue?venueCode={venue_code}&dateCode={date_code}"
@@ -55,7 +56,11 @@ def fetch_single_venue(venue, date_code, retries=3):
             if response.status_code == 200:
                 if not response.text.strip().startswith("{"):
                     raise RuntimeError(f"Blocked by Cloudflare on {venue_code}")
-                return {"venueCode": venue_code, "data": response.json()}
+                return {
+                    "venueCode": venue_code,
+                    "regionCode": region_code,
+                    "data": response.json()
+                }
             elif response.status_code in [403, 429]:
                 scraper = get_scraper()
                 time.sleep((2 ** attempt) + random.uniform(0.5, 1.5))
@@ -88,12 +93,20 @@ def parse_bms_data(raw_results, date_code, target_date_str):
             continue
             
         venue_code = result["venueCode"]
+        region_code = str(result.get("regionCode") or "").strip()
         venue = sd[0].get("Venues", {})
         venue_name = venue.get("VenueName", "")
         chain = venue.get("VenueCompName", "Unknown")
         lat = venue.get("VenueLatitude", "")
         lng = venue.get("VenueLongitude", "")
-        city = "Unknown"
+
+        # Fallback to API venue object if region_code was missing in parent venue
+        api_region = str(venue.get("RegionCode") or venue.get("VenueCity") or venue.get("City") or "").strip()
+        effective_region = region_code if region_code else api_region
+
+        raw_region_code = effective_region if effective_region else "Unknown"
+        raw_city = effective_region if effective_region else "Unknown"
+        city = raw_city
         
         for ev in sd[0].get("Event", []):
             title = ev.get("EventTitle", "Unknown")
@@ -172,6 +185,8 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                             "venue": venue_name,
                             "chain": chain,
                             "city": city,
+                            "raw_city": raw_city,
+                            "raw_region_code": raw_region_code,
                             "lat": lat,
                             "lng": lng,
                             "date": target_date_str,
@@ -217,6 +232,7 @@ def run_dynamic_venue_discovery(scraper, date_code, known_venues):
                             new_venue = {
                                 "VenueCode": vcode,
                                 "VenueName": v.get("VenueName"),
+                                "RegionCode": region.capitalize(),
                                 "City": region.capitalize(),
                             }
                             discovered.append(new_venue)

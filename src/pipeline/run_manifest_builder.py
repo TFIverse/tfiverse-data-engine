@@ -123,6 +123,8 @@ def build_manifest(run_id: str = None, dry_run: bool = False, skip_b2: bool = Fa
     paytm_file = DATA_DIR / "latest_paytm_data.json"
     bms_advance_file = DATA_DIR / "latest_bms_advance_data.json"
     paytm_advance_file = DATA_DIR / "latest_paytm_advance_data.json"
+    bms_deep_advance_file = DATA_DIR / "latest_bms_deep_advance_data.json"
+    paytm_deep_advance_file = DATA_DIR / "latest_paytm_deep_advance_data.json"
 
     # Destination directory for immutable run artifacts
     runs_dir = DATA_DIR / "runs" / today_ist / run_id
@@ -225,6 +227,52 @@ def build_manifest(run_id: str = None, dry_run: bool = False, skip_b2: bool = Fa
                 print(f"   ✓ Paytm Advance: {p_adv_records} records (SHA-256: {p_adv_hash[:12]}...) -> {p_adv_key}")
         except Exception as e:
             print(f"   ⚠️ Paytm Advance skipped: {e}")
+
+    # 5. Optional BMS Deep Advance Files (if present and valid)
+    if bms_deep_advance_file.exists() and bms_deep_advance_file.stat().st_size > 0:
+        try:
+            b_deep_records, b_deep_size = validate_payload(bms_deep_advance_file, "BMS_DEEP_ADVANCE", min_records=0)
+            if b_deep_records > 0:
+                b_deep_hash = compute_sha256(bms_deep_advance_file)
+                b_deep_key = f"runs/{today_ist}/{run_id}/bms_deep_advance.json"
+                if not dry_run:
+                    shutil.copy2(bms_deep_advance_file, runs_dir / "bms_deep_advance.json")
+                sources_manifest["bms_deep_advance"] = {
+                    "key": b_deep_key,
+                    "records": b_deep_records,
+                    "sha256": b_deep_hash,
+                    "size_bytes": b_deep_size,
+                    "status": "VALIDATED"
+                }
+                total_records += b_deep_records
+                shards_expected += 1
+                shards_successful += 1
+                print(f"   ✓ BMS Deep Advance: {b_deep_records} records (SHA-256: {b_deep_hash[:12]}...) -> {b_deep_key}")
+        except Exception as e:
+            print(f"   ⚠️ BMS Deep Advance skipped: {e}")
+
+    # 6. Optional Paytm Deep Advance Files (if present and valid)
+    if paytm_deep_advance_file.exists() and paytm_deep_advance_file.stat().st_size > 0:
+        try:
+            p_deep_records, p_deep_size = validate_payload(paytm_deep_advance_file, "PAYTM_DEEP_ADVANCE", min_records=0)
+            if p_deep_records > 0:
+                p_deep_hash = compute_sha256(paytm_deep_advance_file)
+                p_deep_key = f"runs/{today_ist}/{run_id}/paytm_deep_advance.json"
+                if not dry_run:
+                    shutil.copy2(paytm_deep_advance_file, runs_dir / "paytm_deep_advance.json")
+                sources_manifest["paytm_deep_advance"] = {
+                    "key": p_deep_key,
+                    "records": p_deep_records,
+                    "sha256": p_deep_hash,
+                    "size_bytes": p_deep_size,
+                    "status": "VALIDATED"
+                }
+                total_records += p_deep_records
+                shards_expected += 1
+                shards_successful += 1
+                print(f"   ✓ Paytm Deep Advance: {p_deep_records} records (SHA-256: {p_deep_hash[:12]}...) -> {p_deep_key}")
+        except Exception as e:
+            print(f"   ⚠️ Paytm Deep Advance skipped: {e}")
 
     # Construct Manifest Object
     manifest = {
