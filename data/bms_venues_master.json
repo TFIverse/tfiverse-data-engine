@@ -19198,5 +19198,30 @@
     "VenueCode": "ELRV",
     "VenueName": "Elephant Cinema: Vijayapura",
     "RegionCode": "VJPR"
+  },
+  {
+    "VenueCode": "CXMD",
+    "VenueName": "CNOX Multiplex: Damoh",
+    "RegionCode": "DAMO"
+  },
+  {
+    "VenueCode": "SCDG",
+    "VenueName": "Starlight Cinema: Devgad",
+    "RegionCode": "DEGA"
+  },
+  {
+    "VenueCode": "CMWD",
+    "VenueName": "Chhotu Maharaj: Wambo Tundla, Firozabad",
+    "RegionCode": "FRZD"
+  },
+  {
+    "VenueCode": "GDCP",
+    "VenueName": "Gold Cinema: City Plaza, Bani Park (Newly Opened)",
+    "RegionCode": "JAIP"
+  },
+  {
+    "VenueCode": "NYNP",
+    "VenueName": "Narayanpur Cinema: Narayanpur",
+    "RegionCode": "NSAZ"
   }
 ]
