@@ -126,6 +126,15 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                     time_str = sh.get("ShowTime", "")
                     audi = sh.get("Attributes", "") or ""
                     
+                    # Diamond 7: Extract cutOffDateTime and cutOffDateTimeEpoch telemetry
+                    cutoff_dt = str(sh.get("CutOffDateTime") or sh.get("cutOffDateTime") or "").strip()
+                    cutoff_epoch = sh.get("CutOffDateTimeEpoch") or sh.get("cutOffDateTimeEpoch")
+                    if cutoff_epoch is not None:
+                        try:
+                            cutoff_epoch = int(cutoff_epoch)
+                        except (ValueError, TypeError):
+                            cutoff_epoch = None
+                    
                     # Skip cancelled shows
                     show_status = str(sh.get("ShowStatus", "")).lower()
                     if "cancel" in show_status or "suspend" in show_status:
@@ -202,7 +211,9 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                             "isFastFilling": is_fast_filling,
                             "source": "BMS",
                             "venueId": venue_code,
-                            "showId": str(sh.get("SessionId", ""))
+                            "showId": str(sh.get("SessionId", "")),
+                            "cutOffDateTime": cutoff_dt,
+                            "cutOffDateTimeEpoch": cutoff_epoch
                         })
                         
     return final_sessions
