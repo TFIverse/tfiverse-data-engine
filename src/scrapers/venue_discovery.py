@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 BMS_VENUES_FILE = DATA_DIR / "bms_venues_master.json"
+BMS_REGIONS_FILE = DATA_DIR / "bms_regions_master.json"
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
@@ -77,35 +78,58 @@ def main():
     existing_codes = {v.get("VenueCode") for v in existing_venues if v.get("VenueCode")}
     print(f"📦 Currently tracking {len(existing_codes)} venues.")
     
-    # 2. Get list of all cities from BookMyShow
-    print("🗺️ Fetching master list of all regions...")
-    scraper = get_scraper()
-    res = scraper.get("https://in.bookmyshow.com/serv/getData?cmd=GETREGIONS")
-    
-    if res.status_code != 200:
-        print("❌ Failed to fetch regions API")
-        return
-        
+    # 2. Get list of all cities (Diamond 6: Local authoritative master with live fallback)
     cities = []
-    try:
-        text = res.text
-        # The endpoint returns raw JS: var regionlst={...};var subRegionData=...
-        json_str = text.split("var regionlst=")[1].split(";var ")[0]
-        data = json.loads(json_str)
+    if BMS_REGIONS_FILE.exists():
+        try:
+            print("🗺️ Loading authoritative BMS Regions Master (Diamond 6)...")
+            with open(BMS_REGIONS_FILE, "r") as f:
+                regions_data = json.load(f)
+            
+            # Prioritize AP/TG circuit cities, then others
+            ap_tg_cities = []
+            other_cities = []
+            for r in regions_data:
+                slug = r.get("RegionSlug")
+                if not slug:
+                    continue
+                if r.get("StateCode") in ("AP", "TG") or r.get("StateName") in ("Andhra Pradesh", "Telangana"):
+                    ap_tg_cities.append(slug.lower())
+                else:
+                    other_cities.append(slug.lower())
+            
+            cities = list(dict.fromkeys(ap_tg_cities + other_cities))
+            print(f"📍 Loaded {len(cities)} regions ({len(ap_tg_cities)} AP/TG circuits) from authoritative master.")
+        except Exception as e:
+            print(f"⚠️ Warning loading master file: {e}. Falling back to live API.")
+    
+    if not cities:
+        print("🗺️ Fetching master list of all regions from live BMS API...")
+        scraper = get_scraper()
+        res = scraper.get("https://in.bookmyshow.com/serv/getData?cmd=GETREGIONS")
         
-        for k, v in data.items():
-            if isinstance(v, list):
-                for item in v:
-                    city_name = item.get("name")
-                    if city_name:
-                        cities.append(city_name)
-    except Exception as e:
-        print("❌ Failed to parse regions:", e)
-        return
-        
-    # Deduplicate city list
-    cities = list(set([c.lower().replace(" ", "-") for c in cities if c]))
-    print(f"📍 Found {len(cities)} unique cities. Scanning for new theatres...")
+        if res.status_code != 200:
+            print("❌ Failed to fetch regions API")
+            return
+            
+        try:
+            text = res.text
+            # The endpoint returns raw JS: var regionlst={...};var subRegionData=...
+            json_str = text.split("var regionlst=")[1].split(";var ")[0]
+            data = json.loads(json_str)
+            
+            for k, v in data.items():
+                if isinstance(v, list):
+                    for item in v:
+                        city_name = item.get("name")
+                        if city_name:
+                            cities.append(city_name.lower().replace(" ", "-"))
+            cities = list(set([c for c in cities if c]))
+        except Exception as e:
+            print("❌ Failed to parse regions:", e)
+            return
+
+    print(f"📍 Target queue: {len(cities)} unique cities. Scanning for new theatres...")
     
     # 3. Scan all cities in parallel
     new_venues_found = 0
