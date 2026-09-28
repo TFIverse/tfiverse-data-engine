@@ -19238,5 +19238,20 @@
     "VenueCode": "CMJG",
     "VenueName": "Chhotu Maharaj: Kosmada, Surat",
     "RegionCode": "SURT"
+  },
+  {
+    "VenueCode": "PFDN",
+    "VenueName": "PVR: DLF Summit Plaza, Gurugram",
+    "RegionCode": "NCR"
+  },
+  {
+    "VenueCode": "SDCO",
+    "VenueName": "Sharda Cineplex: Gorakhpur",
+    "RegionCode": "GABR"
+  },
+  {
+    "VenueCode": "SPCU",
+    "VenueName": "ShivParvati Cinema: Ishwarpur",
+    "RegionCode": "SANG"
   }
 ]
