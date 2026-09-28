@@ -19163,5 +19163,40 @@
     "VenueCode": "BCBD",
     "VenueName": "Bharath Chitramandira: Devadurga",
     "RegionCode": "DEVD"
+  },
+  {
+    "VenueCode": "RFFU",
+    "VenueName": "R2K Cinema: Firozpur",
+    "RegionCode": "FRZR"
+  },
+  {
+    "VenueCode": "ONEB",
+    "VenueName": "1 Cinema by Mukta A2: Bharatmata (Newly Renovated)",
+    "RegionCode": "MUMBAI"
+  },
+  {
+    "VenueCode": "CNTX",
+    "VenueName": "ICONIX CINEMAS: (OLD AARADHANA TALKIES) THANE",
+    "RegionCode": "MUMBAI"
+  },
+  {
+    "VenueCode": "HANS",
+    "VenueName": "Raj Chitramandir: Chalisgaon",
+    "RegionCode": "CHLS"
+  },
+  {
+    "VenueCode": "CCPV",
+    "VenueName": "Cinephile Cinema: Pandavpura",
+    "RegionCode": "PAVA"
+  },
+  {
+    "VenueCode": "EYCW",
+    "VenueName": "Eylex Cinemas: Siwan",
+    "RegionCode": "SWNB"
+  },
+  {
+    "VenueCode": "ELRV",
+    "VenueName": "Elephant Cinema: Vijayapura",
+    "RegionCode": "VJPR"
   }
 ]
