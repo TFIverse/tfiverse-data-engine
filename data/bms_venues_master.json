@@ -19223,5 +19223,20 @@
     "VenueCode": "NYNP",
     "VenueName": "Narayanpur Cinema: Narayanpur",
     "RegionCode": "NSAZ"
+  },
+  {
+    "VenueCode": "SVGT",
+    "VenueName": "Sanelite Cinemas: Gravite Mall: Una",
+    "RegionCode": "UNAU"
+  },
+  {
+    "VenueCode": "CMBW",
+    "VenueName": "Chhotu Maharaj: Bankura, WB",
+    "RegionCode": "BNKU"
+  },
+  {
+    "VenueCode": "CMJG",
+    "VenueName": "Chhotu Maharaj: Kosmada, Surat",
+    "RegionCode": "SURT"
   }
 ]
