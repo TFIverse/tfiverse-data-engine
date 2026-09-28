@@ -54,8 +54,10 @@ def fetch_single_venue(venue, date_code, retries=3):
         try:
             response = scraper.get(url, timeout=10)
             if response.status_code == 200:
-                if not response.text.strip().startswith("{"):
-                    raise RuntimeError(f"Blocked by Cloudflare on {venue_code}")
+                text_clean = response.text.strip()
+                # Diamond 5: Validate JSON payload and reject Cloudflare Turnstile / challenge HTML
+                if not text_clean.startswith("{") or "Just a moment..." in text_clean or "challenge-platform" in text_clean:
+                    raise RuntimeError(f"Blocked by Cloudflare challenge on {venue_code}")
                 return {
                     "venueCode": venue_code,
                     "regionCode": region_code,

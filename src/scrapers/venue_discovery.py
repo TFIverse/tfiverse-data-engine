@@ -35,13 +35,18 @@ def fetch_city_venues(city_slug):
     
     # Bypass step 1: hit the region homepage to get cookies
     homepage_url = f"https://in.bookmyshow.com/explore/home/{city_slug}"
-    scraper.get(homepage_url, timeout=10)
+    homepage_res = scraper.get(homepage_url, timeout=10)
+    
+    # Diamond 5: Validate genuine BMS page (not Cloudflare challenge/Turnstile)
+    if homepage_res.status_code != 200 or "window.__INITIAL_STATE__" not in homepage_res.text:
+        print(f"[Diamond 5] Cloudflare challenge or block on homepage for {city_slug}")
+        return []
     
     # Fetch venues for region
     json_url = "https://in.bookmyshow.com/serv/getData?cmd=QUICKBOOK&type=MT"
     response = scraper.get(json_url, timeout=10)
     
-    if response.status_code != 200:
+    if response.status_code != 200 or not response.text.strip().startswith("{"):
         return []
         
     try:
