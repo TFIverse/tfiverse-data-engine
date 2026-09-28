@@ -124,7 +124,8 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                         continue
                         
                     time_str = sh.get("ShowTime", "")
-                    audi = sh.get("Attributes", "") or ""
+                    raw_audi = str(sh.get("Attributes") or "").strip()
+                    audi = "Main Screen" if not raw_audi or raw_audi.lower() in ["null", "undefined"] else raw_audi
                     
                     # Diamond 7: Extract cutOffDateTime and cutOffDateTimeEpoch telemetry
                     cutoff_dt = str(sh.get("CutOffDateTime") or sh.get("cutOffDateTime") or "").strip()
@@ -135,49 +136,56 @@ def parse_bms_data(raw_results, date_code, target_date_str):
                         except (ValueError, TypeError):
                             cutoff_epoch = None
                     
-                    # Skip cancelled shows
+                    # Diamond 11: Skip cancelled, suspended, and postponed shows
                     show_status = str(sh.get("ShowStatus", "")).lower()
-                    if "cancel" in show_status or "suspend" in show_status:
+                    attr_status = str(sh.get("Attributes", "")).lower()
+                    if any(w in show_status for w in ["cancel", "suspend", "postpone"]) or "cancelled" in attr_status or "suspended" in attr_status:
                         continue
                         
                     total_seats = 0
                     available_seats = 0
-                    gross_revenue = 0
+                    sold_seats_total = 0
+                    gross_revenue = 0.0
                     categories_list = []
                     
                     for cat in sh.get("Categories", []):
-                        # Safely parse numeric fields
                         def parse_int(val):
-                            return int(val) if str(val).lstrip('-').isdigit() else 0
+                            try:
+                                return int(val)
+                            except (ValueError, TypeError):
+                                return 0
                             
-                        seats_in_cat = parse_int(cat.get("MaxSeats", 0))
+                        seats_in_cat = max(0, parse_int(cat.get("MaxSeats", 0)))
                         avail_in_cat = parse_int(cat.get("SeatsAvail", 0))
                         
-                        # Sometimes Blocked Seats are omitted, but sometimes present
-                        # Usually SeatsAvail + Sold + Blocked = MaxSeats
-                        # A safer calculation for Sold is (MaxSeats - SeatsAvail)
-                        # BMS sometimes reports SeatsAvail as negative if overbooked
+                        # Diamond 11 Glitch Guard: Clamp negative availability to 0
                         if avail_in_cat < 0:
                             avail_in_cat = 0
                             
-                        price = float(cat.get("CurPrice", 0))
-                        sold_in_cat = max(0, seats_in_cat - avail_in_cat)
+                        try:
+                            price = max(0.0, float(cat.get("CurPrice", 0) or 0))
+                        except (ValueError, TypeError):
+                            price = 0.0
+                            
+                        sold_in_cat = min(seats_in_cat, max(0, seats_in_cat - avail_in_cat))
+                        cat_gross = round(sold_in_cat * price, 2)
                         
                         total_seats += seats_in_cat
                         available_seats += avail_in_cat
-                        
-                        if sold_in_cat > 0:
-                            gross_revenue += (sold_in_cat * price)
+                        sold_seats_total += sold_in_cat
+                        gross_revenue += cat_gross
                             
                         categories_list.append({
-                            "name": cat.get("PriceDesc", "Unknown"),
+                            "name": str(cat.get("PriceDesc") or "General").strip() or "General",
                             "price": price,
                             "total": seats_in_cat,
                             "sold": sold_in_cat,
-                            "available": avail_in_cat
+                            "available": avail_in_cat,
+                            "gross": cat_gross
                         })
                             
-                    sold_seats = total_seats - available_seats
+                    sold_seats = max(0, min(total_seats, total_seats - available_seats))
+                    gross_revenue = round(gross_revenue, 2)
                     
                     # Calculate fast filling and housefull statuses
                     is_housefull = (available_seats == 0 and total_seats > 0)
