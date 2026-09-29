@@ -19463,5 +19463,10 @@
     "VenueCode": "NTBT",
     "VenueName": "Nataraj Theater: Bantumilli",
     "RegionCode": "BANT"
+  },
+  {
+    "VenueCode": "RMMT",
+    "VenueName": "Rajhans Multiplex: Morbi",
+    "RegionCode": "MOBI"
   }
 ]
