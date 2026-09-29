@@ -19308,5 +19308,10 @@
     "VenueCode": "CPSC",
     "VenueName": "CPS Cine Shine Complex: Chhibramau",
     "RegionCode": "CHHI"
+  },
+  {
+    "VenueCode": "BRPD",
+    "VenueName": "Brahmaputra Cineplex: Dhubri",
+    "RegionCode": "DHBR"
   }
 ]
