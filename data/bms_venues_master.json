@@ -19313,5 +19313,65 @@
     "VenueCode": "BRPD",
     "VenueName": "Brahmaputra Cineplex: Dhubri",
     "RegionCode": "DHBR"
+  },
+  {
+    "VenueCode": "SCXP",
+    "VenueName": "Srinivasa Cine Complex: Palakollu",
+    "RegionCode": "PLKL"
+  },
+  {
+    "VenueCode": "LAXN",
+    "VenueName": "G3 Lakshmi Narayana 4K Dolby Atmos: Tadepalligudem",
+    "RegionCode": "TADP"
+  },
+  {
+    "VenueCode": "SRUP",
+    "VenueName": "Srinivasa Theatre A/C DTS: Uppada",
+    "RegionCode": "UPDA"
+  },
+  {
+    "VenueCode": "GCAD",
+    "VenueName": "Geetha Cinemas 2K A/C Dts: Seethanagaram",
+    "RegionCode": "SEET"
+  },
+  {
+    "VenueCode": "MMTB",
+    "VenueName": "Mamaji Talkies: Bhusawal",
+    "RegionCode": "BHUS"
+  },
+  {
+    "VenueCode": "JSCH",
+    "VenueName": "Jags Cinema: Haldwani",
+    "RegionCode": "HALD"
+  },
+  {
+    "VenueCode": "ANCJ",
+    "VenueName": "Ayaan Cinemas, Jalandhar {PPR Mall}",
+    "RegionCode": "JALA"
+  },
+  {
+    "VenueCode": "RRTG",
+    "VenueName": "Royal Cinema: Jhabua",
+    "RegionCode": "JHAB"
+  },
+  {
+    "VenueCode": "CMAY",
+    "VenueName": "CINELIFE Miniplex (Dolby Atmos): Ahilyanagar",
+    "RegionCode": "AHMED"
+  },
+  {
+    "VenueCode": "TCMZ",
+    "VenueName": "Test Cinema: Sri Lanka",
+    "RegionCode": "COLO"
+  },
+  {
+    "VenueCode": "CCLG",
+    "VenueName": "CONNPLEX Luxuriance Cinemas: Darbhanga",
+    "RegionCode": "DARB"
+  },
+  {
+    "VenueCode": "RCXN",
+    "VenueName": "Radhakrishna Cinemax: Nayagarh",
+    "RegionCode": "NAYG"
   }
 ]
