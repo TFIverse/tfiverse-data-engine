@@ -19268,5 +19268,20 @@
     "VenueCode": "ASTY",
     "VenueName": "Ashok Theatre A/C 4K Dolby Atmos: Pondicherry",
     "RegionCode": "POND"
+  },
+  {
+    "VenueCode": "AACS",
+    "VenueName": "Amman Arangham Cinemas A/C Dolby: Alagusamuthiram",
+    "RegionCode": "SALM"
+  },
+  {
+    "VenueCode": "ATEV",
+    "VenueName": "Anandha Theatre A/C DTS: Valasaiyur",
+    "RegionCode": "SALM"
+  },
+  {
+    "VenueCode": "TBMY",
+    "VenueName": "Tibbadevi Theatre: Mysuru",
+    "RegionCode": "MYS"
   }
 ]
