@@ -19283,5 +19283,25 @@
     "VenueCode": "TBMY",
     "VenueName": "Tibbadevi Theatre: Mysuru",
     "RegionCode": "MYS"
+  },
+  {
+    "VenueCode": "SDMA",
+    "VenueName": "Sri Durga Mahal A/c Dts: Kamavarapukota",
+    "RegionCode": "KPKT"
+  },
+  {
+    "VenueCode": "NCCI",
+    "VenueName": "Nupur Cinema: Chh.Sambhajinagar (Newly Renovated)",
+    "RegionCode": "AURA"
+  },
+  {
+    "VenueCode": "PLEH",
+    "VenueName": "PVR: Leh",
+    "RegionCode": "LEHL"
+  },
+  {
+    "VenueCode": "LHLT",
+    "VenueName": "Laxmi Cinema Hall: Titagarh",
+    "RegionCode": "TTGH"
   }
 ]
