@@ -19458,5 +19458,10 @@
     "VenueCode": "SJMT",
     "VenueName": "Sree Jayalakshmi Talkies: Samalkot",
     "RegionCode": "SAMA"
+  },
+  {
+    "VenueCode": "NTBT",
+    "VenueName": "Nataraj Theater: Bantumilli",
+    "RegionCode": "BANT"
   }
 ]
