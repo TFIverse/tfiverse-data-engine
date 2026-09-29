@@ -19253,5 +19253,20 @@
     "VenueCode": "SPCU",
     "VenueName": "ShivParvati Cinema: Ishwarpur",
     "RegionCode": "SANG"
+  },
+  {
+    "VenueCode": "SCDP",
+    "VenueName": "Ashwin Cinemas RGB Laser Dolby Atmos: Pondicherry",
+    "RegionCode": "POND"
+  },
+  {
+    "VenueCode": "RRFT",
+    "VenueName": "Raja Talkies A/C DTS: Pondicherry",
+    "RegionCode": "POND"
+  },
+  {
+    "VenueCode": "ASTY",
+    "VenueName": "Ashok Theatre A/C 4K Dolby Atmos: Pondicherry",
+    "RegionCode": "POND"
   }
 ]
