@@ -19453,5 +19453,10 @@
     "VenueCode": "NKDL",
     "VenueName": "ACE NK Cinema: Phalodi",
     "RegionCode": "PHLD"
+  },
+  {
+    "VenueCode": "SJMT",
+    "VenueName": "Sree Jayalakshmi Talkies: Samalkot",
+    "RegionCode": "SAMA"
   }
 ]
