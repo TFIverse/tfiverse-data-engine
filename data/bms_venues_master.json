@@ -19303,5 +19303,10 @@
     "VenueCode": "LHLT",
     "VenueName": "Laxmi Cinema Hall: Titagarh",
     "RegionCode": "TTGH"
+  },
+  {
+    "VenueCode": "CPSC",
+    "VenueName": "CPS Cine Shine Complex: Chhibramau",
+    "RegionCode": "CHHI"
   }
 ]
