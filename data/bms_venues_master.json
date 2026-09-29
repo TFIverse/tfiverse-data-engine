@@ -19408,5 +19408,15 @@
     "VenueCode": "SYMM",
     "VenueName": "Sanjaya Theatre: Mandya",
     "RegionCode": "MND"
+  },
+  {
+    "VenueCode": "CJJX",
+    "VenueName": "CONNPLEX Smart Cinemas: Jagdalpur",
+    "RegionCode": "JAGD"
+  },
+  {
+    "VenueCode": "LNSJ",
+    "VenueName": "LN Smart Theatre: Jehanabad",
+    "RegionCode": "JEHA"
   }
 ]
