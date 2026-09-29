@@ -19373,5 +19373,25 @@
     "VenueCode": "RCXN",
     "VenueName": "Radhakrishna Cinemax: Nayagarh",
     "RegionCode": "NAYG"
+  },
+  {
+    "VenueCode": "CMCX",
+    "VenueName": "Cinemagic Cinemas: Bikaner",
+    "RegionCode": "BIK"
+  },
+  {
+    "VenueCode": "MGMF",
+    "VenueName": "MGM Filmiplex Cinema: Dhuri",
+    "RegionCode": "DHRI"
+  },
+  {
+    "VenueCode": "PMNK",
+    "VenueName": "PVR: Mymoon, Kochi",
+    "RegionCode": "KOCH"
+  },
+  {
+    "VenueCode": "VTPI",
+    "VenueName": "Vest Talkies: Pudukkottai",
+    "RegionCode": "PUDH"
   }
 ]
