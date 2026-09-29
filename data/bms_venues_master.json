@@ -19443,5 +19443,15 @@
     "VenueCode": "CXCA",
     "VenueName": "CLEXA Cinema: Bhuyangdev Cross Road",
     "RegionCode": "AHD"
+  },
+  {
+    "VenueCode": "AMAG",
+    "VenueName": "Amuse Arena Cinemas (Dolby Digital): Gaya",
+    "RegionCode": "GAYA"
+  },
+  {
+    "VenueCode": "NKDL",
+    "VenueName": "ACE NK Cinema: Phalodi",
+    "RegionCode": "PHLD"
   }
 ]
