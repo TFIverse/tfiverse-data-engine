@@ -19418,5 +19418,30 @@
     "VenueCode": "LNSJ",
     "VenueName": "LN Smart Theatre: Jehanabad",
     "RegionCode": "JEHA"
+  },
+  {
+    "VenueCode": "CNAD",
+    "VenueName": "CONNPLEX Luxuriance Cinemas: Adani Shantigram",
+    "RegionCode": "AHD"
+  },
+  {
+    "VenueCode": "CSAN",
+    "VenueName": "CONNPLEX Signature Cinemas: Narol",
+    "RegionCode": "AHD"
+  },
+  {
+    "VenueCode": "CIXH",
+    "VenueName": "CINELUX Cinema:Sola SG Highway (Newly Premium JBL)",
+    "RegionCode": "AHD"
+  },
+  {
+    "VenueCode": "MAAM",
+    "VenueName": "Mira Cinema: Ahmedabad",
+    "RegionCode": "AHD"
+  },
+  {
+    "VenueCode": "CXCA",
+    "VenueName": "CLEXA Cinema: Bhuyangdev Cross Road",
+    "RegionCode": "AHD"
   }
 ]
