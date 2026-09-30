@@ -19478,5 +19478,10 @@
     "VenueCode": "BGBM",
     "VenueName": "Biswaprabha Multiplex: Begusarai",
     "RegionCode": "BEGS"
+  },
+  {
+    "VenueCode": "TTRJ",
+    "VenueName": "Triveni Talkies: Rajgangpur",
+    "RegionCode": "RJGR"
   }
 ]
