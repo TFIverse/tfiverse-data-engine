@@ -19468,5 +19468,10 @@
     "VenueCode": "RMMT",
     "VenueName": "Rajhans Multiplex: Morbi",
     "RegionCode": "MOBI"
+  },
+  {
+    "VenueCode": "CYMF",
+    "VenueName": "Cinepolis: City Life Mall, Faridabad",
+    "RegionCode": "NCR"
   }
 ]
