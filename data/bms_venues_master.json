@@ -19473,5 +19473,10 @@
     "VenueCode": "CYMF",
     "VenueName": "Cinepolis: City Life Mall, Faridabad",
     "RegionCode": "NCR"
+  },
+  {
+    "VenueCode": "BGBM",
+    "VenueName": "Biswaprabha Multiplex: Begusarai",
+    "RegionCode": "BEGS"
   }
 ]
