@@ -19483,5 +19483,10 @@
     "VenueCode": "TTRJ",
     "VenueName": "Triveni Talkies: Rajgangpur",
     "RegionCode": "RJGR"
+  },
+  {
+    "VenueCode": "SCEC",
+    "VenueName": "Sharda Cineplex: Etah",
+    "RegionCode": "ETAH"
   }
 ]
