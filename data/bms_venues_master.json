@@ -19498,5 +19498,10 @@
     "VenueCode": "ALTV",
     "VenueName": "Alankar Theatre: Bijapur",
     "RegionCode": "VJPR"
+  },
+  {
+    "VenueCode": "EGCM",
+    "VenueName": "Enjoy Cinema (A.C): Malegaon",
+    "RegionCode": "MALE"
   }
 ]
