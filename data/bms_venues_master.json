@@ -19488,5 +19488,15 @@
     "VenueCode": "SCEC",
     "VenueName": "Sharda Cineplex: Etah",
     "RegionCode": "ETAH"
+  },
+  {
+    "VenueCode": "VLMR",
+    "VenueName": "Velmurugan Theatre: Gudalur",
+    "RegionCode": "CMBM"
+  },
+  {
+    "VenueCode": "ALTV",
+    "VenueName": "Alankar Theatre: Bijapur",
+    "RegionCode": "VJPR"
   }
 ]
