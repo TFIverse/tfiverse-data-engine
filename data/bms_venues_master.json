@@ -19508,5 +19508,10 @@
     "VenueCode": "LNRS",
     "VenueName": "SLN Multiplex 4K Dolby Atmos: Addaroad,Thimmapuram",
     "RegionCode": "TMPR"
+  },
+  {
+    "VenueCode": "EACS",
+    "VenueName": "Ekta Cineplus: Sachin",
+    "RegionCode": "SURT"
   }
 ]
