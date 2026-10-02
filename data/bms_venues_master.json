@@ -19503,5 +19503,10 @@
     "VenueCode": "EGCM",
     "VenueName": "Enjoy Cinema (A.C): Malegaon",
     "RegionCode": "MALE"
+  },
+  {
+    "VenueCode": "LNRS",
+    "VenueName": "SLN Multiplex 4K Dolby Atmos: Addaroad,Thimmapuram",
+    "RegionCode": "TMPR"
   }
 ]
