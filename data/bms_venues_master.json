@@ -19513,5 +19513,15 @@
     "VenueCode": "EACS",
     "VenueName": "Ekta Cineplus: Sachin",
     "RegionCode": "SURT"
+  },
+  {
+    "VenueCode": "SDSH",
+    "VenueName": "Siddhi Cinema: Oros, Sindhudurg",
+    "RegionCode": "SNDH"
+  },
+  {
+    "VenueCode": "MRYD",
+    "VenueName": "Maruthi Theatre: KM Doddi (Mandya) Karnataka",
+    "RegionCode": "MND"
   }
 ]
