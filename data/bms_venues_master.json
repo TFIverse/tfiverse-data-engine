@@ -19523,5 +19523,10 @@
     "VenueCode": "MRYD",
     "VenueName": "Maruthi Theatre: KM Doddi (Mandya) Karnataka",
     "RegionCode": "MND"
+  },
+  {
+    "VenueCode": "LKMM",
+    "VenueName": "Laxmi Theatre: Mall",
+    "RegionCode": "MAAL"
   }
 ]
