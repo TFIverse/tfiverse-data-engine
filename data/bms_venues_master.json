@@ -19528,5 +19528,15 @@
     "VenueCode": "LKMM",
     "VenueName": "Laxmi Theatre: Mall",
     "RegionCode": "MAAL"
+  },
+  {
+    "VenueCode": "FCJT",
+    "VenueName": "Fun Cinemas: Lakhimpur Kheri",
+    "RegionCode": "LKPK"
+  },
+  {
+    "VenueCode": "SSKL",
+    "VenueName": "Shiv Sagar Cineplex: Mohammadi Kheri",
+    "RegionCode": "LKPK"
   }
 ]
