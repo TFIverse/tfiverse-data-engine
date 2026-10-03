@@ -19538,5 +19538,10 @@
     "VenueCode": "SSKL",
     "VenueName": "Shiv Sagar Cineplex: Mohammadi Kheri",
     "RegionCode": "LKPK"
+  },
+  {
+    "VenueCode": "SNSK",
+    "VenueName": "Sanskar Cineplex: Hingoli",
+    "RegionCode": "HING"
   }
 ]
