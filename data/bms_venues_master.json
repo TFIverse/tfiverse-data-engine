@@ -19543,5 +19543,10 @@
     "VenueCode": "SNSK",
     "VenueName": "Sanskar Cineplex: Hingoli",
     "RegionCode": "HING"
+  },
+  {
+    "VenueCode": "SVGH",
+    "VenueName": "Sri Vigneshwar Theatre: Samalkot",
+    "RegionCode": "SAMA"
   }
 ]
