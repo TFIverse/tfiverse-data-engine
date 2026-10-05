@@ -19558,5 +19558,10 @@
     "VenueCode": "CVDF",
     "VenueName": "Cineplus Cinema: Varachha",
     "RegionCode": "SURT"
+  },
+  {
+    "VenueCode": "SPVC",
+    "VenueName": "Sri Padma Veereswara Complex: Yanam",
+    "RegionCode": "YANM"
   }
 ]
