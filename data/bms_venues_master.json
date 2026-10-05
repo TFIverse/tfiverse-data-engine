@@ -19563,5 +19563,10 @@
     "VenueCode": "SPVC",
     "VenueName": "Sri Padma Veereswara Complex: Yanam",
     "RegionCode": "YANM"
+  },
+  {
+    "VenueCode": "CETK",
+    "VenueName": "Chandgude Entertainment: Karmala",
+    "RegionCode": "KMML"
   }
 ]
