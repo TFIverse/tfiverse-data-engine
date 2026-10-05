@@ -19548,5 +19548,15 @@
     "VenueCode": "SVGH",
     "VenueName": "Sri Vigneshwar Theatre: Samalkot",
     "RegionCode": "SAMA"
+  },
+  {
+    "VenueCode": "MTYA",
+    "VenueName": "Mayuri Theater A/c Dolby 7.1 Surround: Nandigama",
+    "RegionCode": "NDGM"
+  },
+  {
+    "VenueCode": "CVDF",
+    "VenueName": "Cineplus Cinema: Varachha",
+    "RegionCode": "SURT"
   }
 ]
