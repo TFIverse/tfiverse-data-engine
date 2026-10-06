@@ -19573,5 +19573,10 @@
     "VenueCode": "PHKD",
     "VenueName": "Pushpa Cinema: Kukshi",
     "RegionCode": "KUKS"
+  },
+  {
+    "VenueCode": "ASRE",
+    "VenueName": "Arasan Theatre: Vijayamangalam",
+    "RegionCode": "EROD"
   }
 ]
