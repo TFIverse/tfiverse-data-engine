@@ -19568,5 +19568,10 @@
     "VenueCode": "CETK",
     "VenueName": "Chandgude Entertainment: Karmala",
     "RegionCode": "KMML"
+  },
+  {
+    "VenueCode": "PHKD",
+    "VenueName": "Pushpa Cinema: Kukshi",
+    "RegionCode": "KUKS"
   }
 ]
