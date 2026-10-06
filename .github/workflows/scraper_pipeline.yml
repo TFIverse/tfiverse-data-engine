@@ -22,7 +22,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python Dependencies
-        run: pip install cloudscraper
+        run: pip install curl_cffi
 
       - name: Run Venue Discovery Engine
         run: python src/scrapers/venue_discovery.py
@@ -53,7 +53,7 @@ jobs:
 
       - name: Install Python Dependencies
         run: |
-          pip install cloudscraper aiohttp nest_asyncio
+          pip install curl_cffi aiohttp nest_asyncio
 
       - name: Run BookMyShow Scraper Shard (Live + Advance)
         env:
@@ -91,7 +91,7 @@ jobs:
 
       - name: Install Python Dependencies
         run: |
-          pip install cloudscraper aiohttp nest_asyncio boto3
+          pip install curl_cffi aiohttp nest_asyncio boto3
 
       - name: Run Paytm Scraper (Live + Advance)
         run: python src/scrapers/paytm_async.py

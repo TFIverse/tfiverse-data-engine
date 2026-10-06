@@ -2,9 +2,8 @@ import os
 import json
 import time
 import random
-import cloudscraper
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from curl_cffi import requests
 
 # Ensure output directory exists
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
@@ -12,42 +11,47 @@ os.makedirs(DATA_DIR, exist_ok=True)
 BMS_VENUES_FILE = DATA_DIR / "bms_venues_master.json"
 BMS_REGIONS_FILE = DATA_DIR / "bms_regions_master.json"
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/118.0.0.0 Safari/537.36",
-]
-
+# Diamond 1 & 5: Safari TLS ClientHello and HTTP/2 signature spoofing
 def get_scraper():
-    scraper = cloudscraper.create_scraper(
-        browser={"browser": "chrome", "platform": "windows", "desktop": True}
-    )
-    scraper.headers.update({
-        "User-Agent": random.choice(USER_AGENTS),
+    session = requests.Session(impersonate="safari17_0")
+    proxy_env = os.environ.get("PROXY_LIST", "")
+    if proxy_env:
+        proxies_list = [p.strip() for p in proxy_env.split(",") if p.strip()]
+        if proxies_list:
+            chosen_proxy = random.choice(proxies_list)
+            session.proxies = {
+                "http": chosen_proxy,
+                "https": chosen_proxy
+            }
+    session.headers.update({
         "Accept": "application/json, text/plain, */*",
         "Origin": "https://in.bookmyshow.com",
         "Referer": "https://in.bookmyshow.com/",
-        "X-Forwarded-For": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
     })
-    return scraper
+    return session
 
 def fetch_city_venues(city_slug):
     scraper = get_scraper()
     
     # Bypass step 1: hit the region homepage to get cookies
     homepage_url = f"https://in.bookmyshow.com/explore/home/{city_slug}"
-    homepage_res = scraper.get(homepage_url, timeout=10)
-    
-    # Diamond 5: Validate genuine BMS page (not Cloudflare challenge/Turnstile)
-    if homepage_res.status_code != 200 or "window.__INITIAL_STATE__" not in homepage_res.text:
-        print(f"[Diamond 5] Cloudflare challenge or block on homepage for {city_slug}")
+    try:
+        homepage_res = scraper.get(homepage_url, timeout=12)
+        # Diamond 5: Validate genuine BMS page (not Cloudflare challenge/Turnstile)
+        if homepage_res.status_code != 200 or "window.__INITIAL_STATE__" not in homepage_res.text:
+            print(f"[Diamond 5] Cloudflare challenge or block on homepage for {city_slug}")
+            return []
+    except Exception as e:
+        print(f"Error fetching homepage for {city_slug}: {e}")
         return []
     
     # Fetch venues for region
     json_url = "https://in.bookmyshow.com/serv/getData?cmd=QUICKBOOK&type=MT"
-    response = scraper.get(json_url, timeout=10)
-    
-    if response.status_code != 200 or not response.text.strip().startswith("{"):
+    try:
+        response = scraper.get(json_url, timeout=12)
+        if response.status_code != 200 or not response.text.strip().startswith("{"):
+            return []
+    except Exception as e:
         return []
         
     try:

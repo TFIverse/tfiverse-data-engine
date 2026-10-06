@@ -1,4 +1,4 @@
-cloudscraper
-requests
-fake-useragent
+curl_cffi>=0.16.0
+boto3
+botocore
 brotli

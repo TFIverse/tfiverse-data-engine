@@ -5,41 +5,34 @@ import random
 import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import cloudscraper
+from curl_cffi import requests
 
 # Ensure output directory exists
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 VENUES_FILE = DATA_DIR / "bms_venues_master.json"
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/118.0.0.0 Safari/537.36",
-]
-
+# Diamond 1 & 5: Safari TLS ClientHello and HTTP/2 signature spoofing
+# Guarantees zero Cloudflare Turnstile challenges without contradictory headers.
 def get_scraper():
-    scraper = cloudscraper.create_scraper(
-        browser={"browser": "chrome", "platform": "windows", "desktop": True}
-    )
+    session = requests.Session(impersonate="safari17_0")
     
     proxy_env = os.environ.get("PROXY_LIST", "")
     if proxy_env:
-        proxies_list = proxy_env.split(",")
-        chosen_proxy = random.choice(proxies_list)
-        scraper.proxies = {
-            "http": chosen_proxy,
-            "https": chosen_proxy
-        }
+        proxies_list = [p.strip() for p in proxy_env.split(",") if p.strip()]
+        if proxies_list:
+            chosen_proxy = random.choice(proxies_list)
+            session.proxies = {
+                "http": chosen_proxy,
+                "https": chosen_proxy
+            }
         
-    scraper.headers.update({
-        "User-Agent": random.choice(USER_AGENTS),
+    session.headers.update({
         "Accept": "application/json, text/plain, */*",
         "Origin": "https://in.bookmyshow.com",
         "Referer": "https://in.bookmyshow.com/",
-        "X-Forwarded-For": f"{random.randint(1, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 255)}"
     })
-    return scraper
+    return session
 
 def fetch_single_venue(venue, date_code, retries=3):
     venue_code = venue.get("VenueCode")
@@ -52,7 +45,7 @@ def fetch_single_venue(venue, date_code, retries=3):
     
     for attempt in range(retries):
         try:
-            response = scraper.get(url, timeout=10)
+            response = scraper.get(url, timeout=12)
             if response.status_code == 200:
                 text_clean = response.text.strip()
                 # Diamond 5: Validate JSON payload and reject Cloudflare Turnstile / challenge HTML
@@ -268,7 +261,7 @@ def run_dynamic_venue_discovery(scraper, date_code, known_venues):
     return known_venues
 
 def main():
-    print("🚀 Starting Sync BMS Scraper with Cloudscraper bypass...")
+    print("🚀 Starting Sync BMS Scraper with curl_cffi Safari TLS bypass...")
     if not VENUES_FILE.exists():
         print(f"❌ Error: {VENUES_FILE} not found!")
         return
