@@ -19578,5 +19578,10 @@
     "VenueCode": "ASRE",
     "VenueName": "Arasan Theatre: Vijayamangalam",
     "RegionCode": "EROD"
+  },
+  {
+    "VenueCode": "MUDT",
+    "VenueName": "Murali Krishna Cinema A/C 4K: Dowlaiswaram",
+    "RegionCode": "RJMU"
   }
 ]
