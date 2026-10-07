@@ -19583,5 +19583,10 @@
     "VenueCode": "MUDT",
     "VenueName": "Murali Krishna Cinema A/C 4K: Dowlaiswaram",
     "RegionCode": "RJMU"
+  },
+  {
+    "VenueCode": "DCGT",
+    "VenueName": "Dnyaneshwar Multiplex: Rahuri (Newly Renovated)",
+    "RegionCode": "RAHU"
   }
 ]
