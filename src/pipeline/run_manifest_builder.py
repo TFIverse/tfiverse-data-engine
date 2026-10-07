@@ -85,29 +85,44 @@ def upload_to_b2(sources_manifest: dict, manifest_file: Path, manifest_key: str,
         return
 
     print(f"☁️ Initializing Backblaze B2 Client ({B2_ENDPOINT}, Bucket: {B2_BUCKET_NAME})...")
-    b2 = boto3.client(
-        service_name='s3',
-        endpoint_url=f"https://{B2_ENDPOINT}",
-        aws_access_key_id=B2_KEY_ID,
-        aws_secret_access_key=B2_APP_KEY,
-        config=Config(signature_version='s3v4')
-    )
+    try:
+        b2 = boto3.client(
+            service_name='s3',
+            endpoint_url=f"https://{B2_ENDPOINT}",
+            aws_access_key_id=B2_KEY_ID,
+            aws_secret_access_key=B2_APP_KEY,
+            config=Config(
+                signature_version='s3v4',
+                retries={'max_attempts': 2, 'mode': 'standard'},
+                connect_timeout=10,
+                read_timeout=30
+            )
+        )
 
-    # 1. Upload each validated source artifact
-    for source_name, source_info in sources_manifest.items():
-        rel_key = source_info["key"]
-        local_src = DATA_DIR / rel_key
-        print(f"   ⬆️ Uploading {source_name} -> {rel_key} ({source_info['records']} records, {source_info['size_bytes']} bytes)...")
-        b2.upload_file(str(local_src), B2_BUCKET_NAME, rel_key)
+        # 1. Upload each validated source artifact
+        for source_name, source_info in sources_manifest.items():
+            rel_key = source_info["key"]
+            local_src = DATA_DIR / rel_key
+            print(f"   ⬆️ Uploading {source_name} -> {rel_key} ({source_info['records']} records, {source_info['size_bytes']} bytes)...")
+            b2.upload_file(str(local_src), B2_BUCKET_NAME, rel_key)
 
-    # 2. Upload signed manifest
-    print(f"   ⬆️ Uploading manifest -> {manifest_key}...")
-    b2.upload_file(str(manifest_file), B2_BUCKET_NAME, manifest_key)
+        # 2. Upload signed manifest
+        print(f"   ⬆️ Uploading manifest -> {manifest_key}...")
+        b2.upload_file(str(manifest_file), B2_BUCKET_NAME, manifest_key)
 
-    # 3. Atomically upload authoritative pointer
-    print(f"   🎯 Atomically publishing LATEST_PUBLISHED_RUN.json to B2 root...")
-    b2.upload_file(str(pointer_file), B2_BUCKET_NAME, "LATEST_PUBLISHED_RUN.json")
-    print("✅ All artifacts, manifest, and atomic pointer published successfully to Backblaze B2!")
+        # 3. Atomically upload authoritative pointer
+        print(f"   🎯 Atomically publishing LATEST_PUBLISHED_RUN.json to B2 root...")
+        b2.upload_file(str(pointer_file), B2_BUCKET_NAME, "LATEST_PUBLISHED_RUN.json")
+        print("✅ All artifacts, manifest, and atomic pointer published successfully to Backblaze B2!")
+    except Exception as e:
+        err_msg = str(e)
+        print(f"⚠️ Backblaze B2 Upload Failed: {err_msg}")
+        if "storage cap exceeded" in err_msg.lower() or "violation of protocol" in err_msg.lower() or "eof" in err_msg.lower():
+            print("🚨 BACKBLAZE B2 CAP ALERT: Account storage cap exceeded ($0.00 / 10 GB limit) or SSL EOF on upload.")
+            print("👉 Fix: Log in to Backblaze console -> Caps & Alerts -> increase or remove storage cap.")
+        elif "accessdenied" in err_msg.lower() or "not entitled" in err_msg.lower():
+            print("🚨 BACKBLAZE B2 PERMISSION ALERT: Application key lacks permissions for bucket.")
+        print("ℹ️ Local manifest & pointer are intact. Continuing pipeline without crashing.")
 
 def build_manifest(run_id: str = None, dry_run: bool = False, skip_b2: bool = False):
     now_ist = get_ist_now()

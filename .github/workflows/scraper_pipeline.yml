@@ -115,3 +115,25 @@ jobs:
           B2_ENDPOINT: "s3.us-west-004.backblazeb2.com"
         run: python src/pipeline/run_manifest_builder.py
 
+      - name: Upload Combined Box Office Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-boxoffice-latest
+          path: |
+            data/latest_*.json
+            data/LATEST_PUBLISHED_RUN.json
+            data/manifests/**
+          retention-days: 7
+
+      - name: Commit and Push Latest Scraped Datasets
+        if: always()
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/latest_*.json data/LATEST_PUBLISHED_RUN.json data/manifests/ 2>/dev/null || true
+          git commit -m "📊 Auto-commit live box office scrape datasets [skip ci]" || echo "No changes to commit"
+          git pull origin main --rebase
+          git push
+
+
