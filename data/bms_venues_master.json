@@ -19588,5 +19588,15 @@
     "VenueCode": "DCGT",
     "VenueName": "Dnyaneshwar Multiplex: Rahuri (Newly Renovated)",
     "RegionCode": "RAHU"
+  },
+  {
+    "VenueCode": "MCTH",
+    "VenueName": "Malleswari Theatre: Thirumalagiri",
+    "RegionCode": "THRM"
+  },
+  {
+    "VenueCode": "PLAT",
+    "VenueName": "Padmalaya Theatre A/C DTS 2K: Attur",
+    "RegionCode": "ATTR"
   }
 ]
