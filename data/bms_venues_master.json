@@ -19598,5 +19598,10 @@
     "VenueCode": "PLAT",
     "VenueName": "Padmalaya Theatre A/C DTS 2K: Attur",
     "RegionCode": "ATTR"
+  },
+  {
+    "VenueCode": "VFFD",
+    "VenueName": "Vashistha Cinema: Aligarh",
+    "RegionCode": "ALI"
   }
 ]
