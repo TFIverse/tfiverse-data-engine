@@ -19613,5 +19613,10 @@
     "VenueCode": "JMST",
     "VenueName": "Jai Maruthi Theatre: Sakleshpur",
     "RegionCode": "SASA"
+  },
+  {
+    "VenueCode": "MTLT",
+    "VenueName": "Maa International Cine Cafe: Alipurduar",
+    "RegionCode": "ALIP"
   }
 ]
