@@ -19603,5 +19603,10 @@
     "VenueCode": "VFFD",
     "VenueName": "Vashistha Cinema: Aligarh",
     "RegionCode": "ALI"
+  },
+  {
+    "VenueCode": "BCVB",
+    "VenueName": "BABA Cineplex: Jamner",
+    "RegionCode": "JAMN"
   }
 ]
