@@ -19623,5 +19623,10 @@
     "VenueCode": "DMAC",
     "VenueName": "Devi Cineplex: Anna Salai, Chennai",
     "RegionCode": "CHEN"
+  },
+  {
+    "VenueCode": "KGNR",
+    "VenueName": "Karpagam Grandplex: Sundarapuram",
+    "RegionCode": "COIM"
   }
 ]
