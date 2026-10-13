@@ -19618,5 +19618,10 @@
     "VenueCode": "MTLT",
     "VenueName": "Maa International Cine Cafe: Alipurduar",
     "RegionCode": "ALIP"
+  },
+  {
+    "VenueCode": "DMAC",
+    "VenueName": "Devi Cineplex: Anna Salai, Chennai",
+    "RegionCode": "CHEN"
   }
 ]
