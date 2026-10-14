@@ -19633,5 +19633,10 @@
     "VenueCode": "SRDO",
     "VenueName": "Rama Durga Theatre: Koyyalagudem",
     "RegionCode": "KOEM"
+  },
+  {
+    "VenueCode": "LPPY",
+    "VenueName": "Lakshmi Picture Palace: Gangavati",
+    "RegionCode": "GAVT"
   }
 ]
