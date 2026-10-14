@@ -19648,5 +19648,10 @@
     "VenueCode": "VNPR",
     "VenueName": "Vandana Chitra Mandir: Vijapur",
     "RegionCode": "VIUR"
+  },
+  {
+    "VenueCode": "SCKM",
+    "VenueName": "SKM Cinemax: Kalluvathukkal",
+    "RegionCode": "KOLM"
   }
 ]
