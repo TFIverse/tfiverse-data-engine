@@ -19638,5 +19638,15 @@
     "VenueCode": "LPPY",
     "VenueName": "Lakshmi Picture Palace: Gangavati",
     "RegionCode": "GAVT"
+  },
+  {
+    "VenueCode": "SKHJ",
+    "VenueName": "Sri Krishna Theater A/C DTS: Hanuman Junction",
+    "RegionCode": "HANU"
+  },
+  {
+    "VenueCode": "VNPR",
+    "VenueName": "Vandana Chitra Mandir: Vijapur",
+    "RegionCode": "VIUR"
   }
 ]
