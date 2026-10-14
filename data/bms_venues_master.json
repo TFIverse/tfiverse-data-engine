@@ -19653,5 +19653,10 @@
     "VenueCode": "SCKM",
     "VenueName": "SKM Cinemax: Kalluvathukkal",
     "RegionCode": "KOLM"
+  },
+  {
+    "VenueCode": "PSHM",
+    "VenueName": "Parameswari Theatre: Kothakota",
+    "RegionCode": "KOTL"
   }
 ]
