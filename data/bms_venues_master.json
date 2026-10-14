@@ -19628,5 +19628,10 @@
     "VenueCode": "KGNR",
     "VenueName": "Karpagam Grandplex: Sundarapuram",
     "RegionCode": "COIM"
+  },
+  {
+    "VenueCode": "SRDO",
+    "VenueName": "Rama Durga Theatre: Koyyalagudem",
+    "RegionCode": "KOEM"
   }
 ]
