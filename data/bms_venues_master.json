@@ -19658,5 +19658,15 @@
     "VenueCode": "PSHM",
     "VenueName": "Parameswari Theatre: Kothakota",
     "RegionCode": "KOTL"
+  },
+  {
+    "VenueCode": "MVTB",
+    "VenueName": "Mini Venkateswara Theater: Bethamcherla",
+    "RegionCode": "BETH"
+  },
+  {
+    "VenueCode": "VTHH",
+    "VenueName": "Sri Venkateshwara 70MM Theatre: Husnabad",
+    "RegionCode": "HSBD"
   }
 ]
