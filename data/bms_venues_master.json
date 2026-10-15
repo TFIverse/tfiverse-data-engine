@@ -19668,5 +19668,10 @@
     "VenueCode": "VTHH",
     "VenueName": "Sri Venkateshwara 70MM Theatre: Husnabad",
     "RegionCode": "HSBD"
+  },
+  {
+    "VenueCode": "VPST",
+    "VenueName": "V.P.S Theatre DTS: Attayampatty, Salem",
+    "RegionCode": "SALM"
   }
 ]
