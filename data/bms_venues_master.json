@@ -19673,5 +19673,15 @@
     "VenueCode": "VPST",
     "VenueName": "V.P.S Theatre DTS: Attayampatty, Salem",
     "RegionCode": "SALM"
+  },
+  {
+    "VenueCode": "GCMO",
+    "VenueName": "G2 Cinemas Dolby Atmos: Vadipatti, Madurai",
+    "RegionCode": "MADU"
+  },
+  {
+    "VenueCode": "LGTS",
+    "VenueName": "Legend Cinema: New Town Square, Gurugram",
+    "RegionCode": "NCR"
   }
 ]
