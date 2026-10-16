@@ -19683,5 +19683,10 @@
     "VenueCode": "LGTS",
     "VenueName": "Legend Cinema: New Town Square, Gurugram",
     "RegionCode": "NCR"
+  },
+  {
+    "VenueCode": "NTKK",
+    "VenueName": "Naveen Talkies: Kotpad",
+    "RegionCode": "KTPD"
   }
 ]
