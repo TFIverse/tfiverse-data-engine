@@ -19693,5 +19693,10 @@
     "VenueCode": "WCUM",
     "VenueName": "Wave Cinemas: Unity One Mall, Janakpuri West",
     "RegionCode": "NCR"
+  },
+  {
+    "VenueCode": "DMHV",
+    "VenueName": "Deepak Mahal: Vuyyuru",
+    "RegionCode": "VYUR"
   }
 ]
