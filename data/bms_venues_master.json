@@ -19698,5 +19698,10 @@
     "VenueCode": "DMHV",
     "VenueName": "Deepak Mahal: Vuyyuru",
     "RegionCode": "VYUR"
+  },
+  {
+    "VenueCode": "PSMK",
+    "VenueName": "PSR Cinemas: Mall of Mandya",
+    "RegionCode": "MND"
   }
 ]
