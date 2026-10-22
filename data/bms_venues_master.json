@@ -19703,5 +19703,15 @@
     "VenueCode": "PSMK",
     "VenueName": "PSR Cinemas: Mall of Mandya",
     "RegionCode": "MND"
+  },
+  {
+    "VenueCode": "NTEE",
+    "VenueName": "Nath Chitramandir: Parli",
+    "RegionCode": "PRLI"
+  },
+  {
+    "VenueCode": "SCRL",
+    "VenueName": "Shree Chitramandir: Parli",
+    "RegionCode": "PRLI"
   }
 ]
