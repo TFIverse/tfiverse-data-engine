@@ -19713,5 +19713,10 @@
     "VenueCode": "SCRL",
     "VenueName": "Shree Chitramandir: Parli",
     "RegionCode": "PRLI"
+  },
+  {
+    "VenueCode": "KCUU",
+    "VenueName": "Kalinga Cinema: Ujjain",
+    "RegionCode": "UJJN"
   }
 ]
