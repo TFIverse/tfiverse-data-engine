@@ -19723,5 +19723,10 @@
     "VenueCode": "JRKP",
     "VenueName": "JRK Cinemas: Parchur",
     "RegionCode": "PARC"
+  },
+  {
+    "VenueCode": "MICG",
+    "VenueName": "Milan Chitralok Cinema: Gulaothi",
+    "RegionCode": "GULL"
   }
 ]
