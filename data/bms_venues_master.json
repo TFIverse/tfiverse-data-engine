@@ -19718,5 +19718,10 @@
     "VenueCode": "KCUU",
     "VenueName": "Kalinga Cinema: Ujjain",
     "RegionCode": "UJJN"
+  },
+  {
+    "VenueCode": "JRKP",
+    "VenueName": "JRK Cinemas: Parchur",
+    "RegionCode": "PARC"
   }
 ]
