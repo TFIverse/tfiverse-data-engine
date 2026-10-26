@@ -19733,5 +19733,10 @@
     "VenueCode": "EVMK",
     "VenueName": "EVM Real Dolby Cinemas: Fort Kochi",
     "RegionCode": "KOCH"
+  },
+  {
+    "VenueCode": "SJSR",
+    "VenueName": "Shree Swami Samarth: Jejuri",
+    "RegionCode": "JEJU"
   }
 ]
