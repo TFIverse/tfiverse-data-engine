@@ -19738,5 +19738,10 @@
     "VenueCode": "SJSR",
     "VenueName": "Shree Swami Samarth: Jejuri",
     "RegionCode": "JEJU"
+  },
+  {
+    "VenueCode": "RTKG",
+    "VenueName": "Raja Talkies 4K Laser Dolby Atmos: Kallakurichi",
+    "RegionCode": "KALL"
   }
 ]
