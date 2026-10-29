@@ -19748,5 +19748,10 @@
     "VenueCode": "CCTL",
     "VenueName": "Capital Cinemas: Trendset Mall, Vijayawada",
     "RegionCode": "VIJA"
+  },
+  {
+    "VenueCode": "CFGP",
+    "VenueName": "Cinepolis: Felix Plaza, Gurugram",
+    "RegionCode": "NCR"
   }
 ]
