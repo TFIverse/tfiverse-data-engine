@@ -19758,5 +19758,10 @@
     "VenueCode": "CZSM",
     "VenueName": "Cinepolis Zee Shaan: Mumbai",
     "RegionCode": "MUMBAI"
+  },
+  {
+    "VenueCode": "SRNZ",
+    "VenueName": "Sri Raghavendra 70MM: Bibinagar",
+    "RegionCode": "BBNG"
   }
 ]
