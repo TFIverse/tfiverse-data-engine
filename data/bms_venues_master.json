@@ -19778,5 +19778,10 @@
     "VenueCode": "CNNJ",
     "VenueName": "CONNPLEX Smart Cinemas: Jammu",
     "RegionCode": "JAMM"
+  },
+  {
+    "VenueCode": "UTCR",
+    "VenueName": "UVT Rave Cinema: Rudrapur",
+    "RegionCode": "RUDP"
   }
 ]
