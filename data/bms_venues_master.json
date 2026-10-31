@@ -19768,5 +19768,10 @@
     "VenueCode": "VOXT",
     "VenueName": "VOX Talkies (Premiere Gold): Sandhurst Road",
     "RegionCode": "MUMBAI"
+  },
+  {
+    "VenueCode": "SNBR",
+    "VenueName": "Sanmax Cinemas: Bahraich",
+    "RegionCode": "BHRH"
   }
 ]
