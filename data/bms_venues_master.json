@@ -19773,5 +19773,10 @@
     "VenueCode": "SNBR",
     "VenueName": "Sanmax Cinemas: Bahraich",
     "RegionCode": "BHRH"
+  },
+  {
+    "VenueCode": "CNNJ",
+    "VenueName": "CONNPLEX Smart Cinemas: Jammu",
+    "RegionCode": "JAMM"
   }
 ]
