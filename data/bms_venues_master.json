@@ -19793,5 +19793,10 @@
     "VenueCode": "LCOE",
     "VenueName": "Legend Cinema: Orris Entertainment Mall, Gurugram",
     "RegionCode": "NCR"
+  },
+  {
+    "VenueCode": "OKBS",
+    "VenueName": "Glitz Cinemas: Sangaria",
+    "RegionCode": "HNMG"
   }
 ]
