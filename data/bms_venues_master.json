@@ -19788,5 +19788,10 @@
     "VenueCode": "CLHV",
     "VenueName": "CONNPLEX Luxuriance Cinemas: The Iconic, Harni",
     "RegionCode": "VAD"
+  },
+  {
+    "VenueCode": "LCOE",
+    "VenueName": "Legend Cinema: Orris Entertainment Mall, Gurugram",
+    "RegionCode": "NCR"
   }
 ]
