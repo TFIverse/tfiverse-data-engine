@@ -19798,5 +19798,10 @@
     "VenueCode": "OKBS",
     "VenueName": "Glitz Cinemas: Sangaria",
     "RegionCode": "HNMG"
+  },
+  {
+    "VenueCode": "JTCR",
+    "VenueName": "Janta Cinema: Ringas",
+    "RegionCode": "RGAS"
   }
 ]
