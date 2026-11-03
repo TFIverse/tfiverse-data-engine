@@ -19803,5 +19803,10 @@
     "VenueCode": "JTCR",
     "VenueName": "Janta Cinema: Ringas",
     "RegionCode": "RGAS"
+  },
+  {
+    "VenueCode": "JASA",
+    "VenueName": "JP Cinema: Satna",
+    "RegionCode": "SATN"
   }
 ]
