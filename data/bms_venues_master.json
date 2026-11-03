@@ -19813,5 +19813,15 @@
     "VenueCode": "CDPT",
     "VenueName": "Cinepolis: DARP The Mall, Patna",
     "RegionCode": "PATN"
+  },
+  {
+    "VenueCode": "DCXV",
+    "VenueName": "Devgn CineX: Vista Square, Gurugram",
+    "RegionCode": "NCR"
+  },
+  {
+    "VenueCode": "AKCA",
+    "VenueName": "Abhishek Cinema: Kudus",
+    "RegionCode": "KUDU"
   }
 ]
