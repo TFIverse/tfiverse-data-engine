@@ -19808,5 +19808,10 @@
     "VenueCode": "JASA",
     "VenueName": "JP Cinema: Satna",
     "RegionCode": "SATN"
+  },
+  {
+    "VenueCode": "CDPT",
+    "VenueName": "Cinepolis: DARP The Mall, Patna",
+    "RegionCode": "PATN"
   }
 ]
