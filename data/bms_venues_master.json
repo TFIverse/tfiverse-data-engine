@@ -19823,5 +19823,10 @@
     "VenueCode": "AKCA",
     "VenueName": "Abhishek Cinema: Kudus",
     "RegionCode": "KUDU"
+  },
+  {
+    "VenueCode": "PMCJ",
+    "VenueName": "PVR: Pacific Mall, Jaipur",
+    "RegionCode": "JAIP"
   }
 ]
