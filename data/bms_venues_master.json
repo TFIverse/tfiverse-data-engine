@@ -19838,5 +19838,10 @@
     "VenueCode": "DRVC",
     "VenueName": "Dreamvue Cinemas: Kadampazhipuram",
     "RegionCode": "MKKA"
+  },
+  {
+    "VenueCode": "CMSP",
+    "VenueName": "Chhotu Maharaj: Sumerpur, RJ",
+    "RegionCode": "SURJ"
   }
 ]
