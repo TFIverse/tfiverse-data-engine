@@ -19828,5 +19828,10 @@
     "VenueCode": "PMCJ",
     "VenueName": "PVR: Pacific Mall, Jaipur",
     "RegionCode": "JAIP"
+  },
+  {
+    "VenueCode": "PAKL",
+    "VenueName": "Pankaj Talkies: Raxaul",
+    "RegionCode": "RAXA"
   }
 ]
