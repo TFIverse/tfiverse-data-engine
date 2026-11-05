@@ -19843,5 +19843,10 @@
     "VenueCode": "CMSP",
     "VenueName": "Chhotu Maharaj: Sumerpur, RJ",
     "RegionCode": "SURJ"
+  },
+  {
+    "VenueCode": "AWMB",
+    "VenueName": "A World Multiplex: Botad",
+    "RegionCode": "BOTA"
   }
 ]
