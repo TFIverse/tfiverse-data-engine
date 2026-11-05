@@ -19848,5 +19848,10 @@
     "VenueCode": "AWMB",
     "VenueName": "A World Multiplex: Botad",
     "RegionCode": "BOTA"
+  },
+  {
+    "VenueCode": "DVGN",
+    "VenueName": "Devgn CineX: Rajkot",
+    "RegionCode": "RAJK"
   }
 ]
