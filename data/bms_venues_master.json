@@ -19853,5 +19853,10 @@
     "VenueCode": "DVGN",
     "VenueName": "Devgn CineX: Rajkot",
     "RegionCode": "RAJK"
+  },
+  {
+    "VenueCode": "RSWT",
+    "VenueName": "Rajeswari Theatre: Nagari",
+    "RegionCode": "NAGI"
   }
 ]
