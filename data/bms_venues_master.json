@@ -19868,5 +19868,10 @@
     "VenueCode": "RGMH",
     "VenueName": "RG Cinemas: Jamnagar",
     "RegionCode": "JAM"
+  },
+  {
+    "VenueCode": "JHCM",
+    "VenueName": "Jai Hind Chitra Mandir: Murgud",
+    "RegionCode": "KOLH"
   }
 ]
