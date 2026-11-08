@@ -19873,5 +19873,10 @@
     "VenueCode": "JHCM",
     "VenueName": "Jai Hind Chitra Mandir: Murgud",
     "RegionCode": "KOLH"
+  },
+  {
+    "VenueCode": "SMDV",
+    "VenueName": "Starline Cinemas: Madurai",
+    "RegionCode": "MADU"
   }
 ]
