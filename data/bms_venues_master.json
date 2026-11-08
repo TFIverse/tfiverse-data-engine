@@ -19883,5 +19883,10 @@
     "VenueCode": "ATVH",
     "VenueName": "Avtar Talkies Vintage Multiplex: Prayagraj",
     "RegionCode": "ALLH"
+  },
+  {
+    "VenueCode": "CNAM",
+    "VenueName": "Cineprime Cinemas HTC: New Naroda, Ahmedabad",
+    "RegionCode": "AHD"
   }
 ]
