@@ -19878,5 +19878,10 @@
     "VenueCode": "SMDV",
     "VenueName": "Starline Cinemas: Madurai",
     "RegionCode": "MADU"
+  },
+  {
+    "VenueCode": "ATVH",
+    "VenueName": "Avtar Talkies Vintage Multiplex: Prayagraj",
+    "RegionCode": "ALLH"
   }
 ]
