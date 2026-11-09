@@ -19888,5 +19888,10 @@
     "VenueCode": "CNAM",
     "VenueName": "Cineprime Cinemas HTC: New Naroda, Ahmedabad",
     "RegionCode": "AHD"
+  },
+  {
+    "VenueCode": "DVKL",
+    "VenueName": "Devgn Cinex Phalanx: Kotdwar",
+    "RegionCode": "KOTD"
   }
 ]
