@@ -19898,5 +19898,10 @@
     "VenueCode": "MKMS",
     "VenueName": "Mahavir Cinema: Sakoli",
     "RegionCode": "BHAA"
+  },
+  {
+    "VenueCode": "ACGC",
+    "VenueName": "Anant Cinema, Galaxy Circle: Pal",
+    "RegionCode": "SURT"
   }
 ]
